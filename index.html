@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        window.Scratch = {
+            extensions: {
+                unsandboxed: true,
+                load(arg) {
+                    console.log("loaded:", arg);
+                }
+            },
+            BlockType: {
+                COMMAND: 0
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <script src="./dist/dist.js"></script>
+</body>
+
+</html>
