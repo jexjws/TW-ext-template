@@ -30,6 +30,7 @@ export default class MyExtension extends Extension {
             //使用load方法加载当前语言的l10n
             translator.load("tanchuang"),
             {
+                //积木参数的name字段必须用$或_开头，否则ts将会编译不通过且方法中也不会有字段类型提示
                 name: "$content",
                 inputType: "string",
                 value: "something"
@@ -39,6 +40,7 @@ export default class MyExtension extends Extension {
             {
                 name: "$suffix",
                 inputType: "menu",
+                //inputType为menu时，value字段必须为一个已定义的Menu的名称
                 value: "suffix"
             }
         ).config({

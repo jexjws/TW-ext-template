@@ -10,3 +10,4 @@
 4. 修改 `src/extension.ts` 即可定义新积木，可在WaterBox中调试积木，或点击复制链接后将其加载到TurboWarp/GandiIDE中。
 5. 检查所有积木功能无误后编译到生产环境，`npm run dist`。
 6. 编译结果输出于 `dist` 文件夹中的 `extension.dist.js`。
+7. 对于 `src/fs-context` 中的文件/夹均为框架代码，勿动。
