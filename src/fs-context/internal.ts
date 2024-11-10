@@ -32,7 +32,8 @@ export interface ScratchWaterBoxed extends Scratch {
 }
 export type BlockType = "command" | "reporter";
 export type ExtractField<A extends (string | { [key: string]: any })[], F extends string> = {
-    [K in keyof A as A[K] extends { [key: string]: any } ? (F extends keyof A[K] ? A[K][F] : never) : never]: any;
+    [K in keyof A as A[K] extends { [key: string]: any } ? (F extends keyof A[K] ? A[K][F] : never) : never]:
+    A[K] extends { [key: string]: any } ? InputTypeCast["inputType" extends keyof A[K] ? A[K]["inputType"] : "string"] : never;
 }
 export interface BlockConfig<T extends (string | ArgumentDefine)[]> {
     method?: MethodFunction<ExtractField<T, "name">>;
@@ -62,6 +63,7 @@ export type InputTypeCast = {
     color: HexColorString;
     "hat-paramater": string;
 }
+export type _ = InputTypeCast[InputType];
 export type TranslatorStoredData = {
     [K in LanguageSupported]?: LanguageStored;
 } & {
