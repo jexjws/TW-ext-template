@@ -47,8 +47,9 @@ export class Block<T = any> {
     method: MethodFunction<T> = () => { };
     arguments: ArgumentPart[] = [];
     type: BlockType = "command";
+    private _opcode: string | null = null;
     get opcode(): string {
-        return md5(JSON.stringify(this.arguments));
+        return this._opcode ? this._opcode : md5(JSON.stringify(this.arguments));
     }
     get text(): string {
         let result: string = "";
@@ -83,6 +84,7 @@ export class Block<T = any> {
                 let data = arg;
                 data.method && (result.method = data.method);
                 data.type && (result.type = data.type);
+                data.opcode && (result._opcode = data.opcode);
                 return result;
             }
         };

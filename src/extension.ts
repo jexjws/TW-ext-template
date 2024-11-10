@@ -31,7 +31,18 @@ export default class MyExtension extends Extension {
             type: "command",
             method(args) {
                 alert(args.$content + " " + args.$suffix);
+            },
+            //积木文字可能变动，手动设置opcode
+            opcode: "alertSth"
+        }),
+        Block.create(
+            "打印runtime"
+        ).config({
+            type: "command",
+            method() {
+                console.log("runtime", this.runtime);
             }
+            //积木应该不会变动，不手动设置opcode，允许自动计算
         })
     ];
     menus = [
