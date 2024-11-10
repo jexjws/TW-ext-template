@@ -6,7 +6,7 @@ export default function load() {
     if (currentScratch) {
         let extensionLoaded = Extensions.load(Extension);
         extensionLoaded.debugPrint();
-        extensionLoaded.to("GandiIDE");
+        extensionLoaded.to("GandiIDE", "TurboWarp");
         Extensions.isInWaterBoxed() ? currentScratch.loadTempExt() : null;
     }
 }

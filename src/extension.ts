@@ -1,3 +1,4 @@
+import { ColorDefine } from "./fs-context/internal";
 import { Block, Collaborator, Extension, Menu, Translator } from "./fs-context/structs";
 let translator = new Translator();
 translator.store({
@@ -31,12 +32,6 @@ export default class MyExtension extends Extension {
             method(args) {
                 alert(args.$content + " " + args.$suffix);
             }
-        }),
-        Block.create("输出runtime").config({
-            type: "command",
-            method(args) {
-                console.log(this);
-            }
         })
     ];
     menus = [
@@ -50,4 +45,7 @@ export default class MyExtension extends Extension {
     collaborators = [
         new Collaborator("FallingShrimp", "https://f-shrimp.solariix.com")
     ];
+    colors: ColorDefine = {
+        theme: "#ff0000"
+    };
 }
