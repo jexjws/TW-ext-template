@@ -8,10 +8,11 @@ export namespace Extensions {
     function generateConstructor(extension: new () => Extension): any {
         var constructor = new extension();
         function ExtensionConstructor(this: any, runtime: Scratch) {
-            if (!getScratch()?.extensions.unsandboxed && !constructor.allowSandboxed) {
+            console.log(runtime);
+            if (!runtime.extensions.unsandboxed && !constructor.allowSandboxed) {
                 throw new Error(`FSExtension "${constructor.id}" must be supported unsandboxed.`)
             }
-            constructor.runtime = runtime;
+            if (!constructor.allowSandboxed) constructor.runtime = runtime;
             let blocks: any[] = [];
             for (let block of constructor.blocks) {
                 let args: any = {};
@@ -35,7 +36,7 @@ export namespace Extensions {
                     }
                 }
                 this[currentBlock.opcode] = (arg: any) => {
-                    block.method.call(this, arg);
+                    block.method.call(constructor, arg);
                 };
                 blocks.push(currentBlock);
             }

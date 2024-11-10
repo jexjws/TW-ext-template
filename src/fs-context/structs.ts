@@ -80,7 +80,7 @@ export class Block<T = any> {
         return {
             config(arg) {
                 let data = arg;
-                data.method && (result.method = data.method.bind(this));
+                data.method && (result.method = data.method);
                 data.type && (result.type = data.type);
                 return result;
             }

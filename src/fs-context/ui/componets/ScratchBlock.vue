@@ -1,14 +1,31 @@
 <template>
     <div class="block" :style="{ backgroundColor: colorBlock, borderColor: colorInputer }">
-        <button class="oval" :style="{ backgroundColor: colorMenu }">Run</button>
-        <button class="oval" :style="{ backgroundColor: colorMenu }">View</button>
-        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="alertArgs($el)">Arg</button>
+        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="runMethod($el, opcode)">Run</button>
+        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="view(opcode)">View</button>
+        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="alerter(calcArgs($el))">Arg</button>
         <slot></slot>
     </div>
 </template>
 <script setup>
-function alertArgs(ele) {
-    alert(ele);
+function calcArgs(ele) {
+    let result = {};
+    ele.querySelectorAll('span.texts').forEach(el => {
+        if ([...el.classList].includes("input")) {
+            result[el.querySelector("span").innerText.slice(0, -1)] = el.querySelector(".inputer").value;
+        }
+    })
+    return result;
+}
+function alerter(sth) {
+    window.alert(JSON.stringify(sth));
+}
+function runMethod(ele, opcode) {
+    window.ScratchWaterBoxed.currentExtension.blocks.find(block => block.opcode === opcode).method.call(window.ScratchWaterBoxed.currentExtension,calcArgs(ele));
+}
+function view(opcode) {
+    alert(JSON.stringify({
+        opcode
+    }, null, 4));
 }
 </script>
 <script>
@@ -25,6 +42,10 @@ export default {
         colorMenu: {
             type: String,
             default: '#0000FF'
+        },
+        opcode: {
+            type: String,
+            default: 'opcode'
         }
     }
 }
@@ -36,6 +57,7 @@ export default {
     display: inline-flex;
     border-radius: 5px;
     align-items: center;
+    margin: 5px 0;
 }
 
 .oval {
@@ -65,5 +87,9 @@ export default {
 
 .oval:hover::before {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+.oval:active::before {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 </style>

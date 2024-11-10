@@ -8,8 +8,8 @@
             </div>
             <div class="blocks">
                 <ScratchBlock v-for="block in blocks" :colorBlock="colorBlock" :colorInputer="colorInputer"
-                    :colorMenu="colorMenu">
-                    <span v-for="arg in block.arguments" class="texts">
+                    :colorMenu="colorMenu" :opcode="block.opcode">
+                    <span v-for="arg in block.arguments" :class="{ 'texts': true, 'input': arg.type === 'input' }">
                         <span v-if="arg.type === 'text'" class="text">{{ arg.content }}</span>
                         <span v-if="arg.type === 'input'" class="label">{{ arg.content }}:</span>
                         <input type="text" v-if="arg.type === 'input' && arg.inputType !== 'menu'" :value="arg.value"
@@ -46,7 +46,7 @@ function reloadExtension() {
     });
 }
 function copyExtensionUrl() {
-    let url = window.location.href + "entry.dist.js";
+    let url = window.location.href + "extension.dist.js";
     try {
         navigator.clipboard.writeText(url);
     }
@@ -54,7 +54,7 @@ function copyExtensionUrl() {
         console.log("Copy failed.");
     }
     finally {
-        alert("已尝试自动复制，若复制失败请手动选中复制：" + url);
+        alert("已尝试自动复制，若复制失败请手动选中复制：\n" + url);
     }
 }
 function findMenu(name) {
@@ -110,7 +110,7 @@ button:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 20px;
+    margin: 20px 10px;
 }
 
 .blocks * {
@@ -124,6 +124,7 @@ button:hover {
 
 .text {
     color: white;
+    text-wrap: nowrap;
 }
 
 .inputer {
@@ -141,7 +142,7 @@ button:hover {
 
 .label {
     color: white;
-    background-color: rgb(255, 255, 255, 0.4);
+    background-color: rgb(255, 255, 255, 0.25);
     border-radius: 5px;
     padding: 0 5px;
 }

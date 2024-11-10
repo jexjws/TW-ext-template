@@ -1,8 +1,8 @@
-import { Block, Collaborator, Extension } from "./fs-context/structs";
+import { Block, Collaborator, Extension, Menu } from "./fs-context/structs";
 export default class MyExtension extends Extension {
-    id = "my-extension";
+    id = "myextension";
     displayName = "My Extension";
-    allowSandboxed = true;
+    allowSandboxed = false;
     blocks = [
         Block.create(
             "弹窗",
@@ -11,13 +11,32 @@ export default class MyExtension extends Extension {
                 inputType: "string",
                 value: "something"
             },
-            "到浏览器窗口"
+            "到浏览器窗口",
+            "，后缀为",
+            {
+                name: "$suffix",
+                inputType: "menu",
+                value: "suffix"
+            }
         ).config({
             type: "command",
             method(args) {
-                alert(args.$content);
+                alert(args.$content + " " + args.$suffix);
+            }
+        }),
+        Block.create("输出runtime").config({
+            type: "command",
+            method(args) {
+                console.log(this);
             }
         })
+    ];
+    menus = [
+        new Menu("suffix", [
+            { name: "已打印", value: "printed" },
+            { name: "已输出", value: "output" },
+            { name: "已显示", value: "displayed" }
+        ])
     ];
     description = "This is my first extension";
     collaborators = [

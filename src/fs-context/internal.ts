@@ -16,7 +16,7 @@ export interface ArgumentDefine {
     value?: string | number;
     inputType?: InputType;
 }
-export type MethodFunction<T = any> = (args: T) => any;
+export type MethodFunction<T = any> = (this: Extension, args: T) => any;
 export interface Scratch {
     extensions: {
         register: (target: new () => any) => void;
