@@ -1,3 +1,4 @@
+import { Block, Extension } from "./structs";
 export class ArgumentPart {
     content: string;
     type: ArgumentPartType;
@@ -11,12 +12,51 @@ export class ArgumentPart {
     }
 }
 export interface ArgumentDefine {
-    name: string;
+    name: `${"_" | "$"}${string}`;
     value?: string | number;
     inputType?: InputType;
 }
 export type MethodFunction<T = any> = (args: T) => any;
-export type PlainScratch = { [key: string]: any };
+export interface Scratch {
+    extensions: {
+        register: (target: new () => any) => void;
+        unsandboxed?: boolean;
+    }
+}
+export interface ScratchWaterBoxed extends Scratch {
+    currentExtension: Extension | null;
+    loadTempExt: () => void;
+}
 export type BlockType = "command" | "reporter";
+export type ExtractField<A extends (string | { [key: string]: any })[], F extends string> = {
+    [K in keyof A as A[K] extends { [key: string]: any } ? (F extends keyof A[K] ? A[K][F] : never) : never]: any;
+};
+export interface BlockConfig<T extends (string | ArgumentDefine)[]> {
+    method?: MethodFunction<ExtractField<T, "name">>;
+    type?: BlockType;
+}
+export interface BlockConfiger<T extends (string | ArgumentDefine)[]> {
+    config: (arg: BlockConfig<T>) => Block;
+}
+export type HexColorString = `#${string}`;
+export interface ColorDefine {
+    block?: HexColorString;
+    inputer?: HexColorString;
+    menu?: HexColorString;
+    theme?: HexColorString;
+}
+export interface MenuItem {
+    name: string;
+    value?: any;
+}
+export type InputTypeCast = {
+    string: string;
+    number: number;
+    bool: boolean;
+    menu: any;
+    angle: number;
+    color: HexColorString;
+    "hat-paramater": string;
+};
 type ArgumentPartType = "text" | "input";
-type InputType = "string" | "number" | "boolean" | "menu";
+type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";

@@ -1,29 +1,26 @@
-import { Extensions } from "./fs-context";
-import { Block, Extension } from "./fs-context/structs";
-class MyExtension extends Extension {
+import { Block, Collaborator, Extension } from "./fs-context/structs";
+export default class MyExtension extends Extension {
     id = "my-extension";
     displayName = "My Extension";
     allowSandboxed = true;
     blocks = [
-        new Block<{
-            content: string
-        }>({
-            opcode: "showAlert",
-            type: "command",
-            arguments: [
-                "弹窗",
-                {
-                    name: "content",
-                    inputType: "number",
-                    value: 0
-                },
-                "到浏览器窗口中"
-            ],
-            method(args) {
-                alert(args.content + "printed");
+        Block.create(
+            "弹窗",
+            {
+                name: "$content",
+                inputType: "string",
+                value: "something"
             },
+            "到浏览器窗口"
+        ).config({
+            type: "command",
+            method(args) {
+                alert(args.$content);
+            }
         })
     ];
+    description = "This is my first extension";
+    collaborators = [
+        new Collaborator("FallingShrimp", "https://f-shrimp.solariix.com")
+    ];
 }
-Extensions.loadFor("TurboWarp", MyExtension);
-Extensions.debugPrint(MyExtension);
