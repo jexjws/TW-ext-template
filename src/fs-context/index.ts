@@ -8,7 +8,6 @@ export namespace Extensions {
     function generateConstructor(extension: new () => Extension): any {
         var constructor = new extension();
         function ExtensionConstructor(this: any, runtime: Scratch) {
-            console.log(runtime);
             if (!runtime.extensions.unsandboxed && !constructor.allowSandboxed) {
                 throw new Error(`FSExtension "${constructor.id}" must be supported unsandboxed.`)
             }
@@ -107,9 +106,12 @@ export namespace Extensions {
                 return this;
             },
             debugPrint() {
-                console.log("constructor:", constructorGenerated);
-                console.log("constructed:", objectGenerated);
-                console.log("info:", objectGenerated.getInfo());
+                console.log("plainObject:");
+                console.dir(objectPlain);
+                console.log("generatedObject:");
+                console.dir(objectGenerated);
+                console.log("info:");
+                console.dir(objectGenerated.getInfo());
                 return this;
             }
         }

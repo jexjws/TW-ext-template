@@ -1,11 +1,19 @@
-import { Block, Collaborator, Extension, Menu } from "./fs-context/structs";
+import { Block, Collaborator, Extension, Menu, Translator } from "./fs-context/structs";
+let translator = new Translator();
+translator.store({
+    "zh-cn": {
+        name: "我的拓展",
+        des: "这是我的第一个拓展",
+        tanchuang: "弹窗"
+    }
+});
 export default class MyExtension extends Extension {
     id = "myextension";
-    displayName = "My Extension";
+    displayName = translator.load("name");
     allowSandboxed = false;
     blocks = [
         Block.create(
-            "弹窗",
+            translator.load("tanchuang"),
             {
                 name: "$content",
                 inputType: "string",
@@ -38,7 +46,7 @@ export default class MyExtension extends Extension {
             { name: "已显示", value: "displayed" }
         ])
     ];
-    description = "This is my first extension";
+    description = translator.load("des");
     collaborators = [
         new Collaborator("FallingShrimp", "https://f-shrimp.solariix.com")
     ];

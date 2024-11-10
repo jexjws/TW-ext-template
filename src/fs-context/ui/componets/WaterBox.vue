@@ -1,7 +1,10 @@
 <template>
     <div class="container">
         <div class="frame">
-            <span class="title">WaterBox for FSExtension</span>
+            <span class="title">
+                WaterBox for FSExtension
+                <span v-if="extensionLoaded">- {{ extName }}({{ extId }})</span>
+            </span>
             <div class="tools">
                 <button @click="reloadExtension()">加载拓展</button>
                 <button @click="copyExtensionUrl()">复制拓展脚本url</button>
@@ -43,6 +46,9 @@ function reloadExtension() {
         colorMenu.value = ext.colors.menu;
         blocks.value = ext.blocks;
         menus.value = ext.menus;
+        extName.value = ext.displayName;
+        extId.value = ext.id;
+        extensionLoaded.value = true;
     });
 }
 function copyExtensionUrl() {
@@ -65,6 +71,9 @@ var colorInputer = ref("purple");
 var colorMenu = ref("pink");
 var blocks = ref([]);
 var menus = ref([]);
+var extName = ref("");
+var extId = ref("");
+var extensionLoaded = ref(false);
 </script>
 <style scoped>
 .container {

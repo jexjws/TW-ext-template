@@ -11,6 +11,9 @@ window.ScratchWaterBoxed = {
         },
         unsandboxed: true
     },
+    translate: {
+        language: "zh-cn"
+    },
     currentExtension: null,
     loadTempExt() {
         if (window.tempExt && window.ScratchWaterBoxed) {

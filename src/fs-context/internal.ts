@@ -21,6 +21,9 @@ export interface Scratch {
     extensions: {
         register: (target: new () => any) => void;
         unsandboxed?: boolean;
+    },
+    translate: {
+        language: LanguageSupported;
     }
 }
 export interface ScratchWaterBoxed extends Scratch {
@@ -30,7 +33,7 @@ export interface ScratchWaterBoxed extends Scratch {
 export type BlockType = "command" | "reporter";
 export type ExtractField<A extends (string | { [key: string]: any })[], F extends string> = {
     [K in keyof A as A[K] extends { [key: string]: any } ? (F extends keyof A[K] ? A[K][F] : never) : never]: any;
-};
+}
 export interface BlockConfig<T extends (string | ArgumentDefine)[]> {
     method?: MethodFunction<ExtractField<T, "name">>;
     type?: BlockType;
@@ -57,6 +60,13 @@ export type InputTypeCast = {
     angle: number;
     color: HexColorString;
     "hat-paramater": string;
-};
-type ArgumentPartType = "text" | "input";
-type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";
+}
+export type TranslatorStoredData = {
+    [K in LanguageSupported]?: LanguageStored;
+} & {
+    [key: string]: LanguageStored;
+}
+export type LanguageSupported = "zh-cn" | "en";
+export type LanguageStored = { [key: string]: string; };
+export type ArgumentPartType = "text" | "input";
+export type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";
