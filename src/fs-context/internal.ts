@@ -63,11 +63,8 @@ export type InputTypeCast = {
     color: HexColorString;
     "hat-paramater": string;
 }
-export type _ = InputTypeCast[InputType];
 export type TranslatorStoredData = {
     [K in LanguageSupported]?: LanguageStored;
-} & {
-    [key: string]: LanguageStored;
 }
 export type LanguageSupported = "zh-cn" | "en";
 export type LanguageStored = { [key: string]: string; };

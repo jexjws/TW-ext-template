@@ -1,5 +1,5 @@
 import { Extensions } from ".";
-import { ArgumentDefine, ArgumentPart, BlockConfiger, BlockType, ColorDefine, MethodFunction, HexColorString, MenuItem, Scratch, TranslatorStoredData, LanguageSupported } from "./internal";
+import { ArgumentDefine, ArgumentPart, BlockConfiger, BlockType, ColorDefine, MethodFunction, HexColorString, MenuItem, Scratch, TranslatorStoredData, LanguageSupported, LanguageStored } from "./internal";
 import md5 from "md5";
 function hexToRgb(str: HexColorString): number[] {
     let hexs: any[] = [];;
@@ -112,8 +112,8 @@ export class Translator {
     private stored: TranslatorStoredData = {};
     unTranslated: string = "[Untranslated keyword $keyword$ for language $language$]";
     language: LanguageSupported = Extensions.getScratch()?.translate.language || 'zh-cn';
-    store(data: TranslatorStoredData) {
-        this.stored = data;
+    store(lang: LanguageSupported, data: LanguageStored) {
+        this.stored[lang] = data;
     }
     load(key: string): string {
         let currentStore = this.stored[this.language];

@@ -1,27 +1,41 @@
 import { ColorDefine } from "./fs-context/internal";
 import { Block, Collaborator, Extension, Menu, Translator } from "./fs-context/structs";
 let translator = new Translator();
-translator.store({
-    "zh-cn": {
-        name: "我的拓展",
-        des: "这是我的第一个拓展",
-        tanchuang: "弹窗"
-    }
+//部署中文l10n表，其他语言同理
+translator.store("zh-cn", {
+    name: "我的拓展",
+    des: "这是我的第一个拓展",
+    tanchuang: "弹窗",
+    towin: "到浏览器窗口",
+    suffix: "并使用后缀",
+    printRun: "打印runtime"
 });
+//英文
+translator.store("en", {
+    name: "My Extension",
+    des: "This is my first extension",
+    tanchuang: "Alert",
+    towin: "to browser window",
+    suffix: "with suffix",
+    printRun: "Print Runtime"
+});
+//只需要把拓展的类作为一个ES默认导出即可
 export default class MyExtension extends Extension {
     id = "myextension";
     displayName = translator.load("name");
+    //只有在非沙盒中运行，积木方法中才能使用this.runtime
     allowSandboxed = false;
     blocks = [
         Block.create(
+            //使用load方法加载当前语言的l10n
             translator.load("tanchuang"),
             {
                 name: "$content",
                 inputType: "string",
                 value: "something"
             },
-            "到浏览器窗口",
-            "，后缀为",
+            translator.load("towin"),
+            translator.load("suffix"),
             {
                 name: "$suffix",
                 inputType: "menu",
@@ -36,7 +50,7 @@ export default class MyExtension extends Extension {
             opcode: "alertSth"
         }),
         Block.create(
-            "打印runtime"
+            translator.load("printRun"),
         ).config({
             type: "command",
             method() {
