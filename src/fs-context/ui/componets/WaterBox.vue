@@ -1,17 +1,21 @@
 <template>
     <div class="container">
-        <div class="frame">
+        <ScratchStage>
+            <span>舞台</span>
+        </ScratchStage>
+        <span v-if="!extensionLoaded">Loading extension...</span>
+        <div class="frame" v-if="extensionLoaded">
             <span class="title">
                 WaterBox for FSExtension
                 <span v-if="extensionLoaded">- {{ extName }}({{ extId }})</span>
             </span>
             <div class="tools">
-                <button @click="reloadExtension()">加载拓展</button>
+                <button @click="reloadExtension()">重载拓展</button>
                 <button @click="copyExtensionUrl()">复制拓展脚本url</button>
             </div>
             <div class="blocks">
                 <ScratchBlock v-for="block in blocks" :colorBlock="colorBlock" :colorInputer="colorInputer"
-                    :colorMenu="colorMenu" :opcode="block.opcode">
+                    :colorMenu="colorMenu" :opcode="block.opcode" :type="block.type" :unparsedText="block.text">
                     <span v-for="arg in block.arguments" :class="{ 'texts': true, 'input': arg.type === 'input' }">
                         <span v-if="arg.type === 'text'" class="text">{{ arg.content }}</span>
                         <span v-if="arg.type === 'input'" class="label">{{ arg.content }}:</span>
@@ -37,9 +41,12 @@ console.log("WaterBox loading");
 <script setup>
 import ScratchBlock from "./ScratchBlock.vue";
 import { ref } from "vue";
+import ScratchStage from "./ScratchStage.vue";
+import { Menu } from "../../structs";
 function reloadExtension() {
+    extensionLoaded.value = false;
     import("../../entry").then(() => {
-        let ext = window.ScratchWaterBoxed.currentExtension;
+        let ext = window.ScratchWaterBoxed.currentExtensionPlain;
         ext.calcColor();
         colorBlock.value = ext.colors.block;
         colorInputer.value = ext.colors.inputer;
@@ -48,7 +55,9 @@ function reloadExtension() {
         menus.value = ext.menus;
         extName.value = ext.displayName;
         extId.value = ext.id;
-        extensionLoaded.value = true;
+        setTimeout(() => {
+            extensionLoaded.value = true;
+        }, 2000);
     });
 }
 function copyExtensionUrl() {
@@ -64,7 +73,7 @@ function copyExtensionUrl() {
     }
 }
 function findMenu(name) {
-    return menus.value.find(menu => menu.name === name);
+    return name instanceof Menu ? name : menus.value.find(menu => menu.name === name);
 }
 var colorBlock = ref("orange");
 var colorInputer = ref("purple");
@@ -74,6 +83,7 @@ var menus = ref([]);
 var extName = ref("");
 var extId = ref("");
 var extensionLoaded = ref(false);
+reloadExtension();
 </script>
 <style scoped>
 .container {
@@ -82,6 +92,7 @@ var extensionLoaded = ref(false);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 
 .frame {

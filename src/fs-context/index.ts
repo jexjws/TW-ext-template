@@ -1,5 +1,5 @@
-import { Scratch, ScratchWaterBoxed } from "./internal";
-import { Extension } from "./structs";
+import { GlobalResourceMachine, Scratch, ScratchWaterBoxed } from "./internal";
+import { Extension, Menu, Version } from "./structs";
 export namespace Extensions {
     const inputTypeCastToScratch: any = {
         bool: "Boolean",
@@ -7,11 +7,28 @@ export namespace Extensions {
     }
     function generateConstructor(extension: new () => Extension): any {
         var constructor = new extension();
-        function ExtensionConstructor(this: any, runtime: Scratch) {
-            if (!runtime.extensions.unsandboxed && !constructor.allowSandboxed) {
+        var context = getFSContext();
+        function ExtensionConstructor(this: any, runtime: any) {
+            if (!runtime.extensions?.unsandboxed && !constructor.allowSandboxed) {
                 throw new Error(`FSExtension "${constructor.id}" must be supported unsandboxed.`)
             }
-            if (!constructor.allowSandboxed) constructor.runtime = runtime;
+            for (let i in constructor.requires) {
+                if (!Object.keys(context.EXTENSIONS).includes(i)) {
+                    throw new Error(`FSExtension "${constructor.id}" requires ${i} to be loaded.`)
+                }
+                if (Version.compare(context.EXTENSIONS[i], constructor.requires[i]) === constructor.requires[i]) {
+                    throw new Error(`FSExtension "${constructor.id}" requires ${i} to be at least ${constructor.requires[i]}.`)
+                };
+            }
+            constructor.blocks.forEach(block => {
+                block.arguments.forEach((arg) => {
+                    if (arg.inputType === "menu" && arg.value instanceof Menu) {
+                        constructor.menus.push(arg.value);
+                        arg.value = arg.value.name;
+                    }
+                });
+            })
+            constructor.runtime = runtime;
             let blocks: any[] = [];
             for (let block of constructor.blocks) {
                 let args: any = {};
@@ -34,9 +51,7 @@ export namespace Extensions {
                         args[arg.content] = currentArg;
                     }
                 }
-                this[currentBlock.opcode] = (arg: any) => {
-                    block.method.call(constructor, arg);
-                };
+                this[currentBlock.opcode] = (arg: any) => JSON.stringify(block.method.call(constructor, arg));
                 blocks.push(currentBlock);
             }
             let menus: any = {};
@@ -74,6 +89,15 @@ export namespace Extensions {
         if (window.Scratch) return window.Scratch;
         return null;
     }
+    export function getFSContext(): GlobalResourceMachine {
+        if (!window._FSContext) {
+            window._FSContext = {
+                EXTENSIONS: {},
+                EXPORTED: {}
+            };
+        }
+        return window._FSContext;
+    }
     export function load(extension: new () => Extension) {
         let constructorPlain = extension
         let constructorGenerated = generateConstructor(extension);
@@ -87,9 +111,13 @@ export namespace Extensions {
                     console.log(`Trying to load FSExtension "${objectPlain.id}" on platform "${platform}"...`);
                     if (platform === "TurboWarp") {
                         getScratch()?.extensions.register(objectGenerated);
+                        if (isInWaterBoxed()) {
+                            (getScratch() as ScratchWaterBoxed).currentExtension = objectGenerated;
+                        }
+                        getFSContext().EXTENSIONS[objectPlain.id] = objectPlain.version;
                     } else if (platform === "GandiIDE") {
                         window.tempExt = {
-                            Extension: extension,
+                            Extension: constructorGenerated,
                             info: {
                                 extensionId: objectPlain.id,
                                 name: objectPlain.displayName,
@@ -99,6 +127,10 @@ export namespace Extensions {
                                 collaboratorList: objectPlain.collaborators
                             }
                         };
+                        if (isInWaterBoxed()) {
+                            (getScratch() as ScratchWaterBoxed).currentExtensionPlain = objectPlain;
+                        }
+                        getFSContext().EXTENSIONS[objectPlain.id] = objectPlain.version;
                     } else {
                         throw new Error(`Unknown platform "${platform}"`);
                     };

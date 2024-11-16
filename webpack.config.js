@@ -1,8 +1,8 @@
 const { VueLoaderPlugin } = require("vue-loader");
 module.exports = {
     entry: {
+        ui: "./src/fs-context/ui/waterbox.ts",
         extension: "./src/fs-context/entry.ts",
-        ui: "./src/fs-context/ui/waterbox.ts"
     },
     output: {
         filename: "[name].dist.js",
@@ -35,6 +35,10 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         },
         port: 25565,
-        compress: true
-    }
+        compress: true,
+        hot: true
+    },
+    optimization: {
+        runtimeChunk: 'single',
+    },
 }

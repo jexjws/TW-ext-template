@@ -1,47 +1,55 @@
-import { Block, Extension } from "./structs";
+import { Block, DataStorer, Extension, Version } from "./structs";
 export class ArgumentPart {
     content: string;
     type: ArgumentPartType;
-    value: string | number = "";
+    value: AcceptedArgType = "";
     inputType: InputType = "string";
-    constructor(content: string, type: ArgumentPartType, value?: string | number, inputType?: InputType) {
+    constructor(content: string, type: ArgumentPartType, value?: AcceptedArgType, inputType?: InputType) {
         this.content = content;
         this.type = type;
         if (value !== undefined) this.value = value;
         if (inputType !== undefined) this.inputType = inputType;
     }
 }
-export interface ArgumentDefine {
-    name: `${"_" | "$"}${string}`;
-    value?: string | number;
+export interface ArgumentDefine<T extends ValidArgumentName = ValidArgumentName> {
+    name: T;
+    value?: AcceptedArgType;
     inputType?: InputType;
 }
+export type ValidArgumentName = `${"$" | "_"}${string}`;
 export type MethodFunction<T = any> = (this: Extension, args: T) => any;
 export interface Scratch {
     extensions: {
         register: (target: new () => any) => void;
         unsandboxed?: boolean;
     },
-    translate: {
-        language: LanguageSupported;
-    }
+    translate: ScratchTranslateFunction
 }
 export interface ScratchWaterBoxed extends Scratch {
-    currentExtension: Extension | null;
+    currentExtensionPlain: Extension | null;
+    currentExtension: any;
     loadTempExt: () => void;
 }
 export type BlockType = "command" | "reporter";
-export type ExtractField<A extends (string | { [key: string]: any })[], F extends string> = {
-    [K in keyof A as A[K] extends { [key: string]: any } ? (F extends keyof A[K] ? A[K][F] : never) : never]:
-    A[K] extends { [key: string]: any } ? InputTypeCast["inputType" extends keyof A[K] ? A[K]["inputType"] : "string"] : never;
+export type ExtractField<A extends (string | ArgumentDefine)[]> = {
+    [K in keyof A as A[K] extends ArgumentDefine<infer R> ? R : never]:
+    A[K] extends ArgumentDefine<infer R>
+    ? A[K]["inputType"] extends keyof InputTypeCast
+    ? InputTypeCast[A[K]["inputType"]]
+    : unknown
+    : never;
 }
-export interface BlockConfig<T extends (string | ArgumentDefine)[]> {
-    method?: MethodFunction<ExtractField<T, "name">>;
+export interface BlockConfigA<T extends (string | ArgumentDefine)[]> {
+    method?: MethodFunction<ExtractField<T>>;
     type?: BlockType;
     opcode?: string;
 }
+export interface BlockConfigB<T extends ArgumentDefine[]> {
+    arguments?: T;
+    type?: BlockType;
+}
 export interface BlockConfiger<T extends (string | ArgumentDefine)[]> {
-    config: (arg: BlockConfig<T>) => Block;
+    config: (arg: BlockConfigA<T>) => Block;
 }
 export type HexColorString = `#${string}`;
 export interface ColorDefine {
@@ -70,3 +78,38 @@ export type LanguageSupported = "zh-cn" | "en";
 export type LanguageStored = { [key: string]: string; };
 export type ArgumentPartType = "text" | "input";
 export type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";
+export interface GlobalResourceMachine {
+    EXTENSIONS: ObjectInclude<Version>;
+    EXPORTED: { [key: string]: DataStorer }
+}
+export interface ScratchTranslateFunction extends Function {
+    language: LanguageSupported;
+}
+export interface ElementContext<T extends HTMLElement = HTMLElement> {
+    result: T;
+    child: (target: ElementContext) => ElementContext<T>;
+    class: (...classes: string[]) => ElementContext<T>;
+    attribute: <K extends keyof FilterWritableKeys<T>>(key: K, value: T[K]) => ElementContext<T>;
+    style: <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>(key: K, value: CSSStyleDeclaration[K]) => ElementContext<T>;
+}
+export type WritableKeys<T> = {
+    [K in keyof T]: If<
+        Equal<Pick<T, K>, Readonly<Pick<T, K>>>,
+        never,
+        K
+    >;
+}[keyof T];
+export type FilterWritableKeys<T> = {
+    [K in WritableKeys<T>]: T[K];
+}
+export type If<C extends boolean, T, F> = C extends true ? T : F;
+export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? true : false;
+export type ObjectInclude<T> = {
+    [key: string]: T;
+}
+export type VersionString = `${number}.${number}.${number}`;
+export type FilterKey<T, K> = {
+    [P in keyof T as P extends K ? never : P]: never;
+}
+export type FilterOut<T, U> = T extends U ? never : T;
+export type AcceptedArgType = InputTypeCast[FilterOut<keyof InputTypeCast, "">]

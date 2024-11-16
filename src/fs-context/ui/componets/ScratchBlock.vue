@@ -1,7 +1,7 @@
 <template>
     <div class="block" :style="{ backgroundColor: colorBlock, borderColor: colorInputer }">
         <button class="oval" :style="{ backgroundColor: colorMenu }" @click="runMethod($el, opcode)">Run</button>
-        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="view(opcode)">View</button>
+        <button class="oval" :style="{ backgroundColor: colorMenu }" @click="view(opcode, type, unparsedText)">View</button>
         <button class="oval" :style="{ backgroundColor: colorMenu }" @click="alerter(calcArgs($el))">Arg</button>
         <slot></slot>
     </div>
@@ -20,11 +20,11 @@ function alerter(sth) {
     window.alert(JSON.stringify(sth));
 }
 function runMethod(ele, opcode) {
-    window.ScratchWaterBoxed.currentExtension.blocks.find(block => block.opcode === opcode).method.call(window.ScratchWaterBoxed.currentExtension,calcArgs(ele));
+    console.log(window.ScratchWaterBoxed.currentExtension[opcode](calcArgs(ele)));
 }
-function view(opcode) {
+function view(opcode, type, unparsedText) {
     alert(JSON.stringify({
-        opcode
+        opcode, type, unparsedText
     }, null, 4));
 }
 </script>
@@ -46,6 +46,14 @@ export default {
         opcode: {
             type: String,
             default: 'opcode'
+        },
+        type: {
+            type: String,
+            default: "command"
+        },
+        unparsedText: {
+            type: String,
+            default: "Unparsed Text"
         }
     }
 }

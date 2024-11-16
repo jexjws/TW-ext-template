@@ -6,7 +6,7 @@ declare interface Window {
     __VUE_PROD_DEVTOOLS__: boolean;
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: boolean;
     tempExt?: {
-        Extension: new () => any,
+        Extension: new (runtime: import("./internal").Scratch) => any,
         info: {
             extensionId: string,
             name: string,
@@ -16,4 +16,5 @@ declare interface Window {
             collaboratorList: import("./structs").Collaborator[]
         }
     }
+    _FSContext?: import("./internal").GlobalResourceMachine
 }
