@@ -1,3 +1,4 @@
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 module.exports = {
     entry: {
@@ -7,8 +8,7 @@ module.exports = {
     output: {
         filename: "[name].dist.js",
         path: __dirname + "/dist",
-        clean: true,
-        publicPath: "."
+        clean: true
     },
     module: {
         rules: [
@@ -29,7 +29,11 @@ module.exports = {
     resolve: {
         extensions: [".ts", ".js", ".vue"]
     },
-    plugins: [new VueLoaderPlugin()],
+    plugins: [new VueLoaderPlugin(), new HtmlWebpackPlugin({
+        template: "./index.html",
+        filename: "index.html",
+        chunks: ["ui"]
+    })],
     devServer: {
         static: "./",
         headers: {
@@ -40,6 +44,6 @@ module.exports = {
         hot: true
     },
     optimization: {
-        runtimeChunk: 'single',
-    },
+        runtimeChunk: 'single'
+    }
 }
