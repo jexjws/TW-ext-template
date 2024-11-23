@@ -82,4 +82,46 @@ export namespace Unnecessary {
             this.length = length;
         }
     }
+    export function splitArgBoxPart(str: string, substrings: string[]) {
+        const substringSet = new Set(substrings);
+        const filteredSubstrings = [];
+        for (let i = 0; i < str.length; i++) {
+            for (const substring of substrings) {
+                if (str.startsWith(substring, i)) {
+                    filteredSubstrings.push(substring);
+                    i += substring.length - 1;
+                    break;
+                }
+            }
+        }
+        return filteredSubstrings;
+    }
+    export function splitTextPart(str: string, separators: string[]) {
+        const regex = new RegExp(separators.map(s => s.replaceAll("$", "\\$")).join('|'), 'g');
+        const result = str.split(regex);
+        return result;
+    }
+    export function hexToRgb(str: HexColorString): number[] {
+        let hexs: any[] = [];;
+        let reg = /^\#?[0-9A-Fa-f]{6}$/;
+        if (!reg.test(str)) throw new Error('Invalid hex color string');
+        str = str.replace('#', '') as HexColorString;
+        hexs = str.match(/../g) || [];
+        for (let i = 0; i < hexs.length; i++) hexs[i] = parseInt(hexs[i], 16);
+        return hexs;
+    }
+    export function darken(color: HexColorString, level: number): HexColorString {
+        let rgb = hexToRgb(color);
+        for (let i = 0; i < 3; i++) {
+            rgb[i] = Math.floor(rgb[i] - (rgb[i] * level))
+        }
+        return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
+    }
+    export function lighten(color: HexColorString, level: number): HexColorString {
+        let rgb = hexToRgb(color);
+        for (let i = 0; i < 3; i++) {
+            rgb[i] = Math.floor(rgb[i] + (255 - rgb[i]) * level)
+        }
+        return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
+    }
 }

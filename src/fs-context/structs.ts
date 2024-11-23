@@ -1,41 +1,7 @@
 import { Extensions } from ".";
 import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, HexColorString, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString } from "./internal";
 import md5 from "md5";
-function filterCharactersBySubstrings(str: string, substrings: string[]) {
-    const substringSet = new Set(substrings);
-    const filteredSubstrings = [];
-    for (let i = 0; i < str.length; i++) {
-        for (const substring of substrings) {
-            if (str.startsWith(substring, i)) {
-                filteredSubstrings.push(substring);
-                i += substring.length - 1;
-                break;
-            }
-        }
-    }
-    return filteredSubstrings;
-}
-function splitStringByMultipleSubstrings(str: string, separators: string[]) {
-    const regex = new RegExp(separators.map(s => s.replaceAll("$", "\\$")).join('|'), 'g');
-    const result = str.split(regex);
-    return result;
-}
-function hexToRgb(str: HexColorString): number[] {
-    let hexs: any[] = [];;
-    let reg = /^\#?[0-9A-Fa-f]{6}$/;
-    if (!reg.test(str)) throw new Error('Invalid hex color string');
-    str = str.replace('#', '') as HexColorString;
-    hexs = str.match(/../g) || [];
-    for (let i = 0; i < hexs.length; i++) hexs[i] = parseInt(hexs[i], 16);
-    return hexs;
-}
-function getDarkColor(color: HexColorString, level: number): HexColorString {
-    let rgb = hexToRgb(color);
-    for (let i = 0; i < 3; i++) {
-        rgb[i] = Math.floor(rgb[i] - (rgb[i] * level))
-    }
-    return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
-}
+import { Unnecessary } from "./tools";
 export class Extension {
     id: string = "example-extension";
     displayName: string = "Example extension";
@@ -54,9 +20,9 @@ export class Extension {
     calcColor() {
         if (this.autoDeriveColors) {
             if (this.colors.theme) {
-                this.colors.block = getDarkColor(this.colors.theme, 0);
-                this.colors.inputer = getDarkColor(this.colors.theme, 0.15);
-                this.colors.menu = getDarkColor(this.colors.theme, 0.3);
+                this.colors.block = Unnecessary.darken(this.colors.theme, 0);
+                this.colors.inputer = Unnecessary.darken(this.colors.theme, 0.15);
+                this.colors.menu = Unnecessary.darken(this.colors.theme, 0.3);
             } else {
                 throw new Error(`FSExtension "${this.id}" can auto derive this.colors but have no theme color.`);
             }
@@ -95,8 +61,8 @@ export class Block {
         let _arguments = realConfig.arguments as ArgumentDefine[];
         let realMethod = method || (() => { }) as any;
         let textLoaded: (string | ArgumentDefine)[] = [];
-        let messages = splitStringByMultipleSubstrings(text, _arguments.map(i => i.name));
-        let args = filterCharactersBySubstrings(text, _arguments.map(i => i.name));
+        let messages = Unnecessary.splitTextPart(text, _arguments.map(i => i.name));
+        let args = Unnecessary.splitArgBoxPart(text, _arguments.map(i => i.name));
         for (let i = 0; i < messages.length; i++) {
             textLoaded.push(messages[i].replaceAll("[", "[").replaceAll("]", "]"));
             let current = _arguments.find(e => e.name === args[i]) as ArgumentDefine;
