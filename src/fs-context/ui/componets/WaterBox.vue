@@ -57,7 +57,7 @@ function reloadExtension() {
         extId.value = ext.id;
         setTimeout(() => {
             extensionLoaded.value = true;
-        }, 2000);
+        }, 500);
     });
 }
 function copyExtensionUrl() {

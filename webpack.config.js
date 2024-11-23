@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const WebpackBar = require("webpackbar");
 const path = require("path");
 module.exports = {
     entry: {
@@ -36,11 +37,17 @@ module.exports = {
             "@samples": path.resolve(__dirname, "src/fs-context/samples")
         }
     },
-    plugins: [new VueLoaderPlugin(), new HtmlWebpackPlugin({
-        template: "./index.html",
-        filename: "index.html",
-        chunks: ["ui"]
-    })],
+    plugins: [
+        new VueLoaderPlugin(),
+        new HtmlWebpackPlugin({
+            template: "./index.html",
+            filename: "index.html"
+        }),
+        new WebpackBar({
+            name: "FS Context",
+            color: "green"
+        })
+    ],
     devServer: {
         static: "./",
         headers: {
@@ -49,8 +56,5 @@ module.exports = {
         port: 25565,
         compress: true,
         hot: true
-    },
-    optimization: {
-        runtimeChunk: 'single'
     }
 }

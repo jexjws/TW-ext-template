@@ -1,7 +1,6 @@
 import { GlobalResourceMachine, LoaderConfig, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
 import { Extension, Menu, Version } from "./structs";
 import loaderConfig from "@config/loader";
-// import(loaderConfig.path).then(e => loaderConfig.target = e);
 export namespace Extensions {
     const inputTypeCastToScratch: any = {
         bool: "Boolean",
@@ -10,10 +9,10 @@ export namespace Extensions {
     function generateConstructor(extension: new () => Extension): any {
         var constructor = new extension();
         var context = getFSContext();
-        function ExtensionConstructor(this: any, runtime: any) {
+        function ExtensionConstructor(this: any, runtime: Scratch) {
             if (!runtime.extensions?.unsandboxed && !constructor.allowSandboxed) {
                 throw new Error(`FSExtension "${constructor.id}" must be supported unsandboxed.`)
-            }
+            };
             for (let i in constructor.requires) {
                 if (!Object.keys(context.EXTENSIONS).includes(i)) {
                     throw new Error(`FSExtension "${constructor.id}" requires ${i} to be loaded.`)
@@ -21,7 +20,8 @@ export namespace Extensions {
                 if (Version.compare(context.EXTENSIONS[i], constructor.requires[i]) === constructor.requires[i]) {
                     throw new Error(`FSExtension "${constructor.id}" requires ${i} to be at least ${constructor.requires[i]}.`)
                 };
-            }
+            };
+            constructor.init(runtime);
             constructor.blocks.forEach(block => {
                 block.arguments.forEach((arg) => {
                     if (arg.inputType === "menu" && arg.value instanceof Menu) {
@@ -29,8 +29,7 @@ export namespace Extensions {
                         arg.value = arg.value.name;
                     }
                 });
-            })
-            constructor.runtime = runtime;
+            });
             let blocks: any[] = [];
             for (let block of constructor.blocks) {
                 let args: any = {};

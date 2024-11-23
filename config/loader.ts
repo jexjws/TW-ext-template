@@ -1,5 +1,5 @@
 export default ({
-    target: import("@src/extension"),
+    target: import("@samples/fs-iframe/extension"),
     errorCatches: [],
-    platform: ["TurboWarp"]
+    platform: ["GandiIDE"]
 } as import("@framework/internal").LoaderConfig)

@@ -28,7 +28,10 @@ export namespace GlobalContext {
     }
 }
 export namespace Unnecessary {
-    export function elementTree<T extends keyof HTMLElementTagNameMap>(tag: T, childs: ElementContext[]): ElementContext<HTMLElementTagNameMap[T]> {
+    export function elementTree<T extends keyof HTMLElementTagNameMap>(
+        tag: T,
+        childs: ElementContext[] = []
+    ): ElementContext<HTMLElementTagNameMap[T]> {
         let result = document.createElement(tag);
         childs.forEach(child => result.appendChild(child.result));
         return {

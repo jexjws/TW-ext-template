@@ -17,6 +17,7 @@ export class Extension {
         theme: "#FF0000"
     };
     runtime: Scratch | null = null;
+    canvas: HTMLCanvasElement | null = null;
     calcColor() {
         if (this.autoDeriveColors) {
             if (this.colors.theme) {
@@ -29,6 +30,7 @@ export class Extension {
         }
         return this.colors;
     }
+    init(runtime: Scratch): any { runtime }
 }
 export class Block {
     method: MethodFunction<any> = () => { };
@@ -52,7 +54,7 @@ export class Block {
     static create<T extends BlockConfigB<ArgumentDefine[]>>(
         text: string,
         config?: T,
-        method?: (arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
+        method?: (this: Extension, arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
     ) {
         let realConfig: BlockConfigB<ArgumentDefine[]> = config || {
             arguments: [],
@@ -124,16 +126,16 @@ export class Translator<L extends LanguageSupported, D extends LanguageStored> {
     store<T extends LanguageSupported>(lang: T, data: D & LanguageStored) {
         this.stored[lang] = data;
     }
-    load(key: string): string {
-        let currentStore = this.stored[this.language];
+    load(keyword: keyof D): string {
+        let currentStore = this.stored[this.language] as D;
         if (currentStore) {
-            return currentStore[key] || this.unTranslatedText(key);
+            return currentStore[keyword] || this.unTranslatedText(keyword);
         } else {
-            return this.unTranslatedText(key);
-        }
+            return this.unTranslatedText(keyword);
+        };
     }
-    unTranslatedText(keyword: string) {
-        let currentStore = this.stored[this.defaultLanguage] as LanguageStored;
+    unTranslatedText(keyword: keyof D) {
+        let currentStore = this.stored[this.defaultLanguage] as D;
         return currentStore[keyword];
     }
     static create<T extends LanguageSupported, D extends LanguageStored>(lang: T, store: D): Translator<T, D> {

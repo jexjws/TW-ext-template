@@ -1,13 +1,12 @@
 import { createApp } from "vue";
 import "./base.css";
 import WaterBox from "./componets/WaterBox.vue";
-import { Extensions } from "..";
 window.__VUE_OPTIONS_API__ = false;
 window.__VUE_PROD_DEVTOOLS__ = false;
 window.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
 window.ScratchWaterBoxed = {
     extensions: {
-        register() {},
+        register() { },
         unsandboxed: true
     },
     translate: 0 as any,
@@ -20,5 +19,10 @@ window.ScratchWaterBoxed = {
             window.tempExt = undefined;
         }
     },
+    renderer: {
+        get canvas() {
+            return document.getElementById("scratch-stage") as HTMLCanvasElement;
+        }
+    }
 };
 createApp(WaterBox).mount("#ui");

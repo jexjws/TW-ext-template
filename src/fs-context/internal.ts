@@ -23,7 +23,10 @@ export interface Scratch {
         register: (target: new () => any) => void;
         unsandboxed?: boolean;
     },
-    translate: ScratchTranslateFunction
+    translate: ScratchTranslateFunction;
+    renderer: {
+        get canvas(): HTMLCanvasElement;
+    }
 }
 export interface ScratchWaterBoxed extends Scratch {
     currentExtensionPlain: Extension | null;
@@ -32,12 +35,7 @@ export interface ScratchWaterBoxed extends Scratch {
 }
 export type BlockType = "command" | "reporter";
 export type ExtractField<A extends (string | ArgumentDefine)[]> = {
-    [K in keyof A as A[K] extends ArgumentDefine<infer R> ? R : never]:
-    A[K] extends ArgumentDefine<infer R>
-    ? A[K]["inputType"] extends keyof InputTypeCast
-    ? InputTypeCast[A[K]["inputType"]]
-    : unknown
-    : never;
+    [K in keyof A as A[K] extends ArgumentDefine<infer R> ? R : never]: any;
 }
 export interface BlockConfigA<T extends (string | ArgumentDefine)[]> {
     method?: MethodFunction<ExtractField<T>>;
@@ -86,7 +84,7 @@ export interface GlobalResourceMachine {
 export interface ScratchTranslateFunction extends Function {
     language: LanguageSupported;
 }
-export interface ElementContext<T extends HTMLElement = HTMLElement> {
+export interface ElementContext<T extends HTMLElement = any> {
     result: T;
     child: (target: ElementContext) => ElementContext<T>;
     class: (...classes: string[]) => ElementContext<T>;

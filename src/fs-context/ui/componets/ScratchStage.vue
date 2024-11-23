@@ -3,7 +3,7 @@
         <div class="content">
             <slot></slot>
         </div>
-        <canvas>
+        <canvas id="scratch-stage">
             <!-- <slot></slot> -->
         </canvas>
     </div>
