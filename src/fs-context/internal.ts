@@ -75,6 +75,7 @@ export type TranslatorStoredData = {
     [K in LanguageSupported]?: LanguageStored;
 }
 export type LanguageSupported = "zh-cn" | "en";
+export type PlatformSupported = "GandiIDE" | "TurboWarp";
 export type LanguageStored = { [key: string]: string; };
 export type ArgumentPartType = "text" | "input";
 export type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";
@@ -104,12 +105,19 @@ export type FilterWritableKeys<T> = {
 }
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? true : false;
-export type ObjectInclude<T> = {
+export type ObjectInclude<T, K extends string | number | symbol = string> = {
     [key: string]: T;
+} & {
+    [C in K]: T;
 }
 export type VersionString = `${number}.${number}.${number}`;
 export type FilterKey<T, K> = {
     [P in keyof T as P extends K ? never : P]: never;
 }
 export type FilterOut<T, U> = T extends U ? never : T;
-export type AcceptedArgType = InputTypeCast[FilterOut<keyof InputTypeCast, "">]
+export type AcceptedArgType = InputTypeCast[FilterOut<keyof InputTypeCast, "">];
+export interface LoaderConfig {
+    target: Promise<{ default: new () => Extension }>;
+    errorCatches: string[];
+    platform: PlatformSupported[];
+}

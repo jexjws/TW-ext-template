@@ -42,10 +42,10 @@ console.log("WaterBox loading");
 import ScratchBlock from "./ScratchBlock.vue";
 import { ref } from "vue";
 import ScratchStage from "./ScratchStage.vue";
-import { Menu } from "../../structs";
+import { Menu } from "@framework/structs";
 function reloadExtension() {
     extensionLoaded.value = false;
-    import("../../entry").then(() => {
+    import("@framework/entry").then(() => {
         let ext = window.ScratchWaterBoxed.currentExtensionPlain;
         ext.calcColor();
         colorBlock.value = ext.colors.block;

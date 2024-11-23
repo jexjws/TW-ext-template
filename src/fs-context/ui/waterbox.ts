@@ -7,9 +7,7 @@ window.__VUE_PROD_DEVTOOLS__ = false;
 window.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
 window.ScratchWaterBoxed = {
     extensions: {
-        register(extensionLoaded: any) {
-            window.ScratchWaterBoxed ? window.ScratchWaterBoxed.currentExtensionPlain = extensionLoaded.objectPlain : null;
-        },
+        register() {},
         unsandboxed: true
     },
     translate: 0 as any,

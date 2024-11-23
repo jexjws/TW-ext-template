@@ -1,5 +1,7 @@
-import { GlobalResourceMachine, Scratch, ScratchWaterBoxed } from "./internal";
+import { GlobalResourceMachine, LoaderConfig, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
 import { Extension, Menu, Version } from "./structs";
+import loaderConfig from "@config/loader";
+// import(loaderConfig.path).then(e => loaderConfig.target = e);
 export namespace Extensions {
     const inputTypeCastToScratch: any = {
         bool: "Boolean",
@@ -81,6 +83,9 @@ export namespace Extensions {
         }
         return ExtensionConstructor;
     }
+    export const config: ObjectInclude<LoaderConfig, "loader"> = {
+        loader: loaderConfig as LoaderConfig
+    }
     export function isInWaterBoxed() {
         return !!window.ScratchWaterBoxed;
     }
@@ -103,18 +108,15 @@ export namespace Extensions {
         let constructorGenerated = generateConstructor(extension);
         let objectPlain = new constructorPlain();
         let objectGenerated = new constructorGenerated(getScratch());
+        let scratch = getScratch() as ScratchWaterBoxed;
         return {
             objectPlain,
             objectGenerated,
-            to(...platforms: ("TurboWarp" | "GandiIDE")[]) {
+            to(...platforms: PlatformSupported[]) {
                 for (let platform of platforms) {
                     console.log(`Trying to load FSExtension "${objectPlain.id}" on platform "${platform}"...`);
                     if (platform === "TurboWarp") {
-                        getScratch()?.extensions.register(objectGenerated);
-                        if (isInWaterBoxed()) {
-                            (getScratch() as ScratchWaterBoxed).currentExtension = objectGenerated;
-                        }
-                        getFSContext().EXTENSIONS[objectPlain.id] = objectPlain.version;
+                        scratch.extensions.register(objectGenerated);
                     } else if (platform === "GandiIDE") {
                         window.tempExt = {
                             Extension: constructorGenerated,
@@ -127,13 +129,14 @@ export namespace Extensions {
                                 collaboratorList: objectPlain.collaborators
                             }
                         };
-                        if (isInWaterBoxed()) {
-                            (getScratch() as ScratchWaterBoxed).currentExtensionPlain = objectPlain;
-                        }
-                        getFSContext().EXTENSIONS[objectPlain.id] = objectPlain.version;
                     } else {
                         throw new Error(`Unknown platform "${platform}"`);
                     };
+                    if (isInWaterBoxed()) {
+                        scratch.currentExtension = objectGenerated;
+                        scratch.currentExtensionPlain = objectPlain;
+                    };
+                    getFSContext().EXTENSIONS[objectPlain.id] = objectPlain.version;
                 }
                 return this;
             },

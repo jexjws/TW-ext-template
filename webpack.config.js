@@ -1,13 +1,14 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const path = require("path");
 module.exports = {
     entry: {
-        ui: "./src/fs-context/ui/waterbox.ts",
-        extension: "./src/fs-context/entry.ts",
+        ui: "@framework/ui/waterbox.ts",
+        extension: "@framework/entry.ts",
     },
     output: {
         filename: "[name].dist.js",
-        path: __dirname + "/dist",
+        path: path.resolve(__dirname, "dist"),
         clean: true
     },
     module: {
@@ -27,7 +28,13 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [".ts", ".js", ".vue"]
+        extensions: [".ts", ".js", ".vue"],
+        alias: {
+            "@framework": path.resolve(__dirname, "src/fs-context"),
+            "@src": path.resolve(__dirname, "src"),
+            "@config": path.resolve(__dirname, "config"),
+            "@samples": path.resolve(__dirname, "src/fs-context/samples")
+        }
     },
     plugins: [new VueLoaderPlugin(), new HtmlWebpackPlugin({
         template: "./index.html",

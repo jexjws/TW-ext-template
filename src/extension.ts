@@ -1,6 +1,6 @@
-import { ColorDefine } from "./fs-context/internal";
-import { Block, Collaborator, Extension, Menu, Translator, Version } from "./fs-context/structs";
-import { GlobalContext, Unnecessary } from "./fs-context/tools";
+import { ColorDefine } from "@framework/internal";
+import { Block, Collaborator, Extension, Menu, Translator, Version } from "@framework/structs";
+import { GlobalContext, Unnecessary } from "@framework/tools";
 let translator = Translator.create("zh-cn", {
     name: "我的拓展",
     des: "这是我的第一个拓展",
