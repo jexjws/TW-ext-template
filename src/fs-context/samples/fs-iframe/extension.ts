@@ -10,6 +10,7 @@ let translator = Translator.create("zh-cn", {
     move: "移动$name到$pos",
     resize: "调整$name的尺寸为$size",
     setLayer: "设置$name的图层为$layer",
+    remove: "移除$name"
 });
 interface Position {
     x: number;
@@ -18,7 +19,7 @@ interface Position {
 export default class FSIFrame extends Extension {
     id = "fsiframe";
     displayName = translator.load("name");
-    version = new Version(1, 0, 0);
+    version = new Version(1, 0, 2);
     description = translator.load("description");
     collaborators = [
         new Collaborator("FallingShrimp", "https://rundll86.github.io")
@@ -43,6 +44,7 @@ export default class FSIFrame extends Extension {
                 }
             ]
         }, function createIF(arg) {
+            if (document.getElementById(`fsiframe-${arg.$name}`)) return;
             let pos = parsePos(arg.$pos);
             let size = parsePos(arg.$size);
             let iframe = Unnecessary.elementTree("iframe")
@@ -115,6 +117,15 @@ export default class FSIFrame extends Extension {
         }, function setLayer(arg) {
             let iframe = document.getElementById(`fsiframe-${arg.$name}`);
             iframe?.style.setProperty("zIndex", arg.$layer);
+        }),
+        Block.create(translator.load("remove"), {
+            arguments: [
+                {
+                    name: "$name"
+                }
+            ]
+        }, function remove(arg) {
+            document.getElementById(`fsiframe-${arg.$name}`)?.remove();
         })
     ]
     init(runtime: Scratch) {

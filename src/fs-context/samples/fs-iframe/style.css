@@ -6,4 +6,6 @@
 
 .fsi-iframe {
     position: absolute;
+    border:none;
+    outline:none;
 }
