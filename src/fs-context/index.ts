@@ -1,37 +1,43 @@
 import { GlobalResourceMachine, LoaderConfig, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
-import { Extension, Menu, Version } from "./structs";
 import loaderConfig from "@config/loader";
+if (!window._FSContext) {
+    window._FSContext = {
+        EXTENSIONS: {},
+        EXPORTED: {}
+    };
+};
 export namespace Extensions {
     const inputTypeCastToScratch: any = {
         bool: "Boolean",
         "hat-paramater": "ccw_hat_parameter"
-    }
-    function generateConstructor(extension: new () => Extension): any {
-        var constructor = new extension();
+    };
+    async function generateConstructor(extension: new () => import("./structs").Extension): Promise<any> {
+        const { Version, Menu } = await import("./structs");
+        var ext = new extension();
         var context = getFSContext();
         function ExtensionConstructor(this: any, runtime: Scratch) {
-            if (!runtime.extensions?.unsandboxed && !constructor.allowSandboxed) {
-                throw new Error(`FSExtension "${constructor.id}" must be supported unsandboxed.`)
+            if (!runtime.extensions?.unsandboxed && !ext.allowSandboxed) {
+                throw new Error(`FSExtension "${ext.id}" must be supported unsandboxed.`)
             };
-            for (let i in constructor.requires) {
+            for (let i in ext.requires) {
                 if (!Object.keys(context.EXTENSIONS).includes(i)) {
-                    throw new Error(`FSExtension "${constructor.id}" requires ${i} to be loaded.`)
+                    throw new Error(`FSExtension "${ext.id}" requires ${i} to be loaded.`)
                 }
-                if (Version.compare(context.EXTENSIONS[i], constructor.requires[i]) === constructor.requires[i]) {
-                    throw new Error(`FSExtension "${constructor.id}" requires ${i} to be at least ${constructor.requires[i]}.`)
+                if (Version.compare(context.EXTENSIONS[i], ext.requires[i]) === ext.requires[i]) {
+                    throw new Error(`FSExtension "${ext.id}" requires ${i} to be at least ${ext.requires[i]}.`)
                 };
             };
-            constructor.init(runtime);
-            constructor.blocks.forEach(block => {
+            ext.init(runtime);
+            ext.blocks.forEach(block => {
                 block.arguments.forEach((arg) => {
                     if (arg.inputType === "menu" && arg.value instanceof Menu) {
-                        constructor.menus.push(arg.value);
+                        ext.menus.push(arg.value);
                         arg.value = arg.value.name;
                     }
                 });
             });
             let blocks: any[] = [];
-            for (let block of constructor.blocks) {
+            for (let block of ext.blocks) {
                 let args: any = {};
                 let currentBlock = {
                     opcode: block.opcode,
@@ -52,11 +58,11 @@ export namespace Extensions {
                         args[arg.content] = currentArg;
                     }
                 }
-                this[currentBlock.opcode] = (arg: any) => JSON.stringify(block.method.call(constructor, arg));
+                this[currentBlock.opcode] = (arg: any) => JSON.stringify(block.method.call(ext, arg));
                 blocks.push(currentBlock);
             }
             let menus: any = {};
-            for (let menu of constructor.menus) {
+            for (let menu of ext.menus) {
                 menus[menu.name] = {
                     acceptReporters: menu.acceptReporters,
                     items: menu.items.map((item) => {
@@ -67,23 +73,23 @@ export namespace Extensions {
                     })
                 };
             }
-            constructor.calcColor();
+            ext.calcColor();
             this.getInfo = function () {
                 return {
-                    id: constructor.id,
-                    name: constructor.displayName,
+                    id: ext.id,
+                    name: ext.displayName,
                     blocks,
                     menus,
-                    color1: constructor.colors.block,
-                    color2: constructor.colors.inputer,
-                    color3: constructor.colors.menu
+                    color1: ext.colors.block,
+                    color2: ext.colors.inputer,
+                    color3: ext.colors.menu
                 }
             }
         }
         return ExtensionConstructor;
     }
     export const config: ObjectInclude<LoaderConfig, "loader"> = {
-        loader: loaderConfig as LoaderConfig
+        loader: loaderConfig
     }
     export function isInWaterBoxed() {
         return !!window.ScratchWaterBoxed;
@@ -94,17 +100,11 @@ export namespace Extensions {
         return null;
     }
     export function getFSContext(): GlobalResourceMachine {
-        if (!window._FSContext) {
-            window._FSContext = {
-                EXTENSIONS: {},
-                EXPORTED: {}
-            };
-        }
-        return window._FSContext;
+        return window._FSContext as GlobalResourceMachine;
     }
-    export function load(extension: new () => Extension) {
+    export async function load(extension: new () => import("./structs").Extension) {
         let constructorPlain = extension
-        let constructorGenerated = generateConstructor(extension);
+        let constructorGenerated = await generateConstructor(extension);
         let objectPlain = new constructorPlain();
         let objectGenerated = new constructorGenerated(getScratch());
         let scratch = getScratch() as ScratchWaterBoxed;
@@ -112,6 +112,7 @@ export namespace Extensions {
             objectPlain,
             objectGenerated,
             to(...platforms: PlatformSupported[]) {
+                console.log(platforms);
                 for (let platform of platforms) {
                     console.log(`Trying to load FSExtension "${objectPlain.id}" on platform "${platform}"...`);
                     if (platform === "TurboWarp") {

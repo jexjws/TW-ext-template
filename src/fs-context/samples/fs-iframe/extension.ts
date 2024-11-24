@@ -5,17 +5,18 @@ import "./style.css";
 let translator = Translator.create("zh-cn", {
     name: "内嵌网页",
     description: "使用iframe嵌入网页",
-    create: "创建名为$name的Iframe于$pos，尺寸$size",
+    create: "创建名为$name的Iframe于$pos，尺寸$size，图层$layer",
     setUrl: "设置$name的URL为$url",
     move: "移动$name到$pos",
-    resize: "调整$name的尺寸为$size"
+    resize: "调整$name的尺寸为$size",
+    setLayer: "设置$name的图层为$layer",
 });
 interface Position {
     x: number;
     y: number;
 }
 export default class FSIFrame extends Extension {
-    id = "fs-iframe";
+    id = "fsiframe";
     displayName = translator.load("name");
     version = new Version(1, 0, 0);
     description = translator.load("description");
@@ -35,6 +36,10 @@ export default class FSIFrame extends Extension {
                 {
                     name: "$size",
                     value: "480 270"
+                },
+                {
+                    name: "$layer",
+                    value: "0"
                 }
             ]
         }, function createIF(arg) {
@@ -46,6 +51,7 @@ export default class FSIFrame extends Extension {
                 .style("top", `${pos.y}px`)
                 .style("width", `${size.x}px`)
                 .style("height", `${size.y}px`)
+                .style("zIndex", arg.$layer)
                 .attribute("id", `fsiframe-${arg.$name}`);
             dataStore.read("rootBase").child(iframe);
             dataStore.write("iframes", iframe);
@@ -95,6 +101,20 @@ export default class FSIFrame extends Extension {
             let iframe = document.getElementById(`fsiframe-${arg.$name}`);
             iframe?.style.setProperty("width", `${size.x}px`);
             iframe?.style.setProperty("height", `${size.y}px`);
+        }),
+        Block.create(translator.load("setLayer"), {
+            arguments: [
+                {
+                    name: "$name"
+                },
+                {
+                    name: "$layer",
+                    value: "0"
+                }
+            ]
+        }, function setLayer(arg) {
+            let iframe = document.getElementById(`fsiframe-${arg.$name}`);
+            iframe?.style.setProperty("zIndex", arg.$layer);
         })
     ]
     init(runtime: Scratch) {

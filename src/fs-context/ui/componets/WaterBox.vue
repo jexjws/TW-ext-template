@@ -43,9 +43,11 @@ import ScratchBlock from "./ScratchBlock.vue";
 import { ref } from "vue";
 import ScratchStage from "./ScratchStage.vue";
 import { Menu } from "@framework/structs";
+import serverConfig from "@config/server";
 function reloadExtension() {
     extensionLoaded.value = false;
-    import("@framework/entry").then(() => {
+    import("../../entry").then(async (e) => {
+        await e.result;
         let ext = window.ScratchWaterBoxed.currentExtensionPlain;
         ext.calcColor();
         colorBlock.value = ext.colors.block;
@@ -61,15 +63,13 @@ function reloadExtension() {
     });
 }
 function copyExtensionUrl() {
-    let url = window.location.href + "extension.dist.js";
+    let url = window.location.protocol + "//" + window.location.hostname + ":" + serverConfig.extension.port + "/" + serverConfig.extension.output + ".dist.js";
     try {
         navigator.clipboard.writeText(url);
+        alert("已复制");
     }
-    catch {
-        console.log("Copy failed.");
-    }
-    finally {
-        alert("已尝试自动复制，若复制失败请手动选中复制：\n" + url);
+    catch (e) {
+        alert("已尝试自动复制，但复制失败，请手动选中复制：\n" + url + `\n${e}`);
     }
 }
 function findMenu(name) {

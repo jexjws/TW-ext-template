@@ -1,5 +1,5 @@
 import { Extensions } from ".";
-import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, HexColorString, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString } from "./internal";
+import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString } from "./internal";
 import md5 from "md5";
 import { Unnecessary } from "./tools";
 export class Extension {

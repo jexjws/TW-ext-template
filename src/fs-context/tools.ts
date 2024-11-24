@@ -1,9 +1,8 @@
 import md5 from "md5";
-import { Extensions } from ".";
 import { ElementContext, GlobalResourceMachine, HexColorString } from "./internal";
 import { DataStorer, Extension } from "./structs";
 export namespace GlobalContext {
-    let context: GlobalResourceMachine = Extensions.getFSContext() as GlobalResourceMachine;
+    let context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
     export function createDataStore<T extends { [key: string]: any }>(forExt: new () => Extension, datas: T): DataStorer<T> {
         let { id } = new forExt;
         if (Object.hasOwn(context.EXPORTED, id)) {

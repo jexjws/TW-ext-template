@@ -1,15 +1,11 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { VueLoaderPlugin } = require("vue-loader");
 const WebpackBar = require("webpackbar");
 const path = require("path");
+const serverConfig = require("./config/server");
 module.exports = {
-    entry: {
-        ui: "@framework/ui/waterbox.ts",
-        extension: "@framework/entry.ts",
-    },
+    entry: "@framework/entry.ts",
     output: {
-        filename: "[name].dist.js",
-        path: path.resolve(__dirname, "dist"),
+        filename: `${serverConfig.extension.output}.dist.js`,
+        path: path.resolve(__dirname, `dist/${serverConfig.extension.output}`),
         clean: true
     },
     module: {
@@ -19,17 +15,13 @@ module.exports = {
                 use: "ts-loader"
             },
             {
-                test: /\.vue$/i,
-                use: "vue-loader"
-            },
-            {
                 test: /\.css$/i,
-                use: ["vue-style-loader", "css-loader"]
+                use: ["style-loader", "css-loader"]
             }
         ]
     },
     resolve: {
-        extensions: [".ts", ".js", ".vue"],
+        extensions: [".ts", ".js"],
         alias: {
             "@framework": path.resolve(__dirname, "src/fs-context"),
             "@src": path.resolve(__dirname, "src"),
@@ -38,13 +30,8 @@ module.exports = {
         }
     },
     plugins: [
-        new VueLoaderPlugin(),
-        new HtmlWebpackPlugin({
-            template: "./index.html",
-            filename: "index.html"
-        }),
         new WebpackBar({
-            name: "FS Context",
+            name: "Extension",
             color: "green"
         })
     ],
@@ -53,8 +40,13 @@ module.exports = {
         headers: {
             'Access-Control-Allow-Origin': '*'
         },
-        port: 25565,
+        port: serverConfig.extension.port,
         compress: true,
-        hot: true
+        hot: false,
+        liveReload: false,
+        webSocketServer: false,
+        client: {
+            overlay: false
+        }
     }
 }
