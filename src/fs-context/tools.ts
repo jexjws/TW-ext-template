@@ -35,6 +35,7 @@ export namespace Unnecessary {
         childs.forEach(child => result.appendChild(child.result));
         return {
             result,
+            datas: {},
             child(target) {
                 result.appendChild(target.result);
                 return this;
@@ -50,6 +51,13 @@ export namespace Unnecessary {
             style(key, value) {
                 result.style[key] = value;
                 return this;
+            },
+            data(key, value) {
+                this.datas[key] = value;
+                return this;
+            },
+            readData(key) {
+                return this.datas[key];
             },
         };
     }

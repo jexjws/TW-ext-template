@@ -19,7 +19,7 @@ interface Position {
 export default class FSIFrame extends Extension {
     id = "fsiframe";
     displayName = translator.load("name");
-    version = new Version(1, 0, 2);
+    version = new Version(1, 1, 4);
     description = translator.load("description");
     collaborators = [
         new Collaborator("FallingShrimp", "https://rundll86.github.io")
@@ -54,9 +54,19 @@ export default class FSIFrame extends Extension {
                 .style("width", `${size.x}px`)
                 .style("height", `${size.y}px`)
                 .style("zIndex", arg.$layer)
-                .attribute("id", `fsiframe-${arg.$name}`);
+                .attribute("id", `fsiframe-${arg.$name}`)
+                .data("ratio-x", size.x / (this.canvas?.clientWidth || size.x))
+                .data("ratio-y", size.y / (this.canvas?.clientHeight || size.y));
             dataStore.read("rootBase").child(iframe);
             dataStore.write("iframes", iframe);
+            setInterval(() => {
+                console.log(this);
+                if (this.canvas) {
+                    iframe
+                        .style("width", `${this.canvas.clientWidth * iframe.readData("ratio-x")}px`)
+                        .style("height", `${this.canvas.clientHeight * iframe.readData("ratio-y")}px`);
+                }
+            }, 100);
         }),
         Block.create(translator.load("setUrl"), {
             arguments: [

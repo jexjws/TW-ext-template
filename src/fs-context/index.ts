@@ -28,6 +28,8 @@ export namespace Extensions {
                 };
             };
             ext.init(runtime);
+            ext.runtime = runtime;
+            ext.canvas = runtime.renderer.canvas;
             ext.blocks.forEach(block => {
                 block.arguments.forEach((arg) => {
                     if (arg.inputType === "menu" && arg.value instanceof Menu) {

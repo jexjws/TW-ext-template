@@ -86,10 +86,13 @@ export interface ScratchTranslateFunction extends Function {
 }
 export interface ElementContext<T extends HTMLElement = any> {
     result: T;
+    datas: ObjectInclude<any>;
     child: (target: ElementContext) => ElementContext<T>;
     class: (...classes: string[]) => ElementContext<T>;
     attribute: <K extends keyof FilterWritableKeys<T>>(key: K, value: T[K]) => ElementContext<T>;
     style: <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>(key: K, value: CSSStyleDeclaration[K]) => ElementContext<T>;
+    data: (key: string, value: any) => ElementContext<T>;
+    readData: (key: string) => any;
 }
 export type WritableKeys<T> = {
     [K in keyof T]: If<
