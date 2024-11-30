@@ -58,7 +58,7 @@ export interface ColorDefine {
 }
 export interface MenuItem {
     name: string;
-    value?: any;
+    value: any;
 }
 export type InputTypeCast = {
     string: string;
@@ -84,15 +84,30 @@ export interface GlobalResourceMachine {
 export interface ScratchTranslateFunction extends Function {
     language: LanguageSupported;
 }
+export interface StyleSetFunc<E extends HTMLElement> {
+    <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>
+        (key: K, value: CSSStyleDeclaration[K]): ElementContext<E>;
+    <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>
+        (key: K): CSSStyleDeclaration[K];
+};
+export interface AttributeSetFunc<E extends HTMLElement> {
+    <K extends keyof FilterWritableKeys<E>>
+        (key: K, value: E[K]): ElementContext<E>;
+    <K extends keyof FilterWritableKeys<E>>
+        (key: K): E[K];
+}
+export interface DataSetFunc<E extends HTMLElement> {
+    (key: string, value: any): ElementContext<E>;
+    (key: string): any;
+}
 export interface ElementContext<T extends HTMLElement = any> {
     result: T;
-    datas: ObjectInclude<any>;
-    child: (target: ElementContext) => ElementContext<T>;
+    store: ObjectInclude<any>;
+    child: (target: ElementContext | HTMLElement) => ElementContext<T>;
     class: (...classes: string[]) => ElementContext<T>;
-    attribute: <K extends keyof FilterWritableKeys<T>>(key: K, value: T[K]) => ElementContext<T>;
-    style: <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>(key: K, value: CSSStyleDeclaration[K]) => ElementContext<T>;
-    data: (key: string, value: any) => ElementContext<T>;
-    readData: (key: string) => any;
+    attribute: AttributeSetFunc<T>;
+    style: StyleSetFunc<T>;
+    data: DataSetFunc<T>;
 }
 export type WritableKeys<T> = {
     [K in keyof T]: If<
@@ -122,3 +137,7 @@ export interface LoaderConfig {
     errorCatches: string[];
     platform: PlatformSupported[];
 }
+export type KeyValueString<T extends string = "="> = `${string}${T}${string}`;
+export type CopyAsGenericsOfArray<E> = E | E[];
+export type MenuDefine = CopyAsGenericsOfArray<string | KeyValueString | MenuItem | StringArray>;
+export type StringArray = KeyValueString<",">;

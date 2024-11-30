@@ -39,7 +39,7 @@ module.exports = {
         new VueLoaderPlugin(),
         new HtmlWebpackPlugin({
             template: "./index.html",
-            filename: "index.html"
+            filename: "index.html",
         }),
         new WebpackBar({
             name: "WaterBox",
@@ -52,7 +52,9 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         },
         port: serverConfig.waterBox.port,
-        compress: true,
-        hot: true
+        hot: true,
+        client: {
+            progress: true
+        }
     }
-}
+};

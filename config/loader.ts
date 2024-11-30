@@ -1,6 +1,6 @@
 type LoaderConfig = import("@framework/internal").LoaderConfig;
 const config: LoaderConfig = {
-    target: import("@samples/fs-iframe/extension"),
+    target: import("@samples/falling-anchors/extension"),
     errorCatches: [],
     platform: ["TurboWarp"]
 }

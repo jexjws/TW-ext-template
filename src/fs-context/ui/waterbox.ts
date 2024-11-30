@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import "./base.css";
 import WaterBox from "./componets/WaterBox.vue";
-window.__VUE_OPTIONS_API__ = false;
+window.__VUE_OPTIONS_API__ = true;
 window.__VUE_PROD_DEVTOOLS__ = false;
 window.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
 window.ScratchWaterBoxed = {

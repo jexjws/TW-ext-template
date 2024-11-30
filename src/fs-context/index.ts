@@ -7,12 +7,9 @@ if (!window._FSContext) {
     };
 };
 export namespace Extensions {
-    const inputTypeCastToScratch: any = {
-        bool: "Boolean",
-        "hat-paramater": "ccw_hat_parameter"
-    };
     async function generateConstructor(extension: new () => import("./structs").Extension): Promise<any> {
         const { Version, Menu } = await import("./structs");
+        const { Unnecessary } = await import("./tools");
         var ext = new extension();
         var context = getFSContext();
         function ExtensionConstructor(this: any, runtime: Scratch) {
@@ -50,7 +47,7 @@ export namespace Extensions {
                 for (let arg of block.arguments) {
                     if (arg.type === "input") {
                         let currentArg: any = {
-                            type: Object.hasOwn(inputTypeCastToScratch, arg.inputType) ? inputTypeCastToScratch[arg.inputType] : arg.inputType,
+                            type: Unnecessary.castInputType(arg.inputType),
                         }
                         if (arg.inputType === "menu") {
                             currentArg.menu = arg.value;
@@ -70,7 +67,7 @@ export namespace Extensions {
                     items: menu.items.map((item) => {
                         return {
                             text: item.name,
-                            value: item.value ? item.value : item.name
+                            value: item.value
                         };
                     })
                 };
@@ -94,7 +91,7 @@ export namespace Extensions {
         loader: loaderConfig
     }
     export function isInWaterBoxed() {
-        return !!window.ScratchWaterBoxed;
+        return window.ScratchWaterBoxed !== undefined;
     }
     export function getScratch(): Scratch | ScratchWaterBoxed | null {
         if (window.ScratchWaterBoxed) return window.ScratchWaterBoxed;
@@ -114,7 +111,6 @@ export namespace Extensions {
             objectPlain,
             objectGenerated,
             to(...platforms: PlatformSupported[]) {
-                console.log(platforms);
                 for (let platform of platforms) {
                     console.log(`Trying to load FSExtension "${objectPlain.id}" on platform "${platform}"...`);
                     if (platform === "TurboWarp") {

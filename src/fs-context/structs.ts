@@ -1,7 +1,7 @@
 import { Extensions } from ".";
-import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString } from "./internal";
+import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString, KeyValueString } from "./internal";
 import md5 from "md5";
-import { Unnecessary } from "./tools";
+import { MenuParser, Unnecessary } from "./tools";
 export class Extension {
     id: string = "example-extension";
     displayName: string = "Example extension";
@@ -25,7 +25,7 @@ export class Extension {
                 this.colors.inputer = Unnecessary.darken(this.colors.theme, 0.15);
                 this.colors.menu = Unnecessary.darken(this.colors.theme, 0.3);
             } else {
-                throw new Error(`FSExtension "${this.id}" can auto derive this.colors but have no theme color.`);
+                throw new Error(`FSExtension "${this.id}" can auto derive colors but have no theme color.`);
             }
         }
         return this.colors;
@@ -53,13 +53,10 @@ export class Block {
     }
     static create<T extends BlockConfigB<ArgumentDefine[]>>(
         text: string,
-        config?: T,
+        config: T,
         method?: (this: Extension, arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
     ) {
-        let realConfig: BlockConfigB<ArgumentDefine[]> = config || {
-            arguments: [],
-            type: "command"
-        };
+        let realConfig: BlockConfigB<ArgumentDefine[]> = { arguments: config.arguments || [], ...config };
         let _arguments = realConfig.arguments as ArgumentDefine[];
         let realMethod = method || (() => { }) as any;
         let textLoaded: (string | ArgumentDefine)[] = [];
@@ -113,10 +110,10 @@ export class Menu {
     acceptReporters: boolean = true;
     items: MenuItem[] = [];
     name: string;
-    constructor(name: string, items?: MenuItem[], acceptReporters?: boolean) {
+    constructor(name: string, items?: (MenuItem | string | KeyValueString)[] | string, acceptReporters?: boolean) {
         this.name = name;
         acceptReporters && (this.acceptReporters = acceptReporters);
-        items && (this.items = items);
+        items && (this.items = MenuParser.normalize(items));
     }
 }
 export class Translator<L extends LanguageSupported, D extends LanguageStored> {

@@ -1,5 +1,5 @@
 import md5 from "md5";
-import { ElementContext, GlobalResourceMachine, HexColorString } from "./internal";
+import { ElementContext, GlobalResourceMachine, HexColorString, InputType, KeyValueString, MenuDefine, MenuItem } from "./internal";
 import { DataStorer, Extension } from "./structs";
 export namespace GlobalContext {
     let context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
@@ -35,30 +35,40 @@ export namespace Unnecessary {
         childs.forEach(child => result.appendChild(child.result));
         return {
             result,
-            datas: {},
+            store: {},
             child(target) {
-                result.appendChild(target.result);
+                if (target instanceof HTMLElement) {
+                    result.appendChild(target);
+                } else {
+                    result.appendChild(target.result);
+                };
                 return this;
             },
             class(...classes: string[]) {
                 result.classList.add(...classes);
                 return this;
             },
-            attribute(key, value) {
-                result[key] = value;
+            attribute(key, value = undefined) {
+                if (value === undefined) {
+                    return result[key];
+                }
+                result[key] = value as any;
                 return this;
             },
-            style(key, value) {
-                result.style[key] = value;
+            style(key, value = undefined) {
+                if (value === undefined) {
+                    return result.style[key] as any;
+                }
+                result.style[key] = value as any;
                 return this;
             },
-            data(key, value) {
-                this.datas[key] = value;
+            data(key, value = undefined) {
+                if (value === undefined) {
+                    return this.store[key];
+                }
+                this.store[key] = value;
                 return this;
-            },
-            readData(key) {
-                return this.datas[key];
-            },
+            }
         };
     }
     export function randomInt(min: number, max: number) {
@@ -107,18 +117,19 @@ export namespace Unnecessary {
         return filteredSubstrings;
     }
     export function splitTextPart(str: string, separators: string[]) {
+        if (!separators.length) return [str];
         const regex = new RegExp(separators.map(s => s.replaceAll("$", "\\$")).join('|'), 'g');
         const result = str.split(regex);
         return result;
     }
-    export function hexToRgb(str: HexColorString): number[] {
+    export function hexToRgb(str: HexColorString): [number, number, number] {
         let hexs: any[] = [];;
         let reg = /^\#?[0-9A-Fa-f]{6}$/;
         if (!reg.test(str)) throw new Error('Invalid hex color string');
         str = str.replace('#', '') as HexColorString;
         hexs = str.match(/../g) || [];
-        for (let i = 0; i < hexs.length; i++) hexs[i] = parseInt(hexs[i], 16);
-        return hexs;
+        if (hexs.length < 3) throw new Error('Invalid hex color string');
+        return [parseInt(hexs[0], 16), parseInt(hexs[1], 16), parseInt(hexs[2], 16)];
     }
     export function darken(color: HexColorString, level: number): HexColorString {
         let rgb = hexToRgb(color);
@@ -133,5 +144,70 @@ export namespace Unnecessary {
             rgb[i] = Math.floor(rgb[i] + (255 - rgb[i]) * level)
         }
         return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
+    }
+    export function castInputType(inputType: InputType) {
+        const inputTypeCastToScratch: any = {
+            bool: "Boolean",
+            "hat-paramater": "ccw_hat_parameter"
+        };
+        return Object.hasOwn(inputTypeCastToScratch, inputType) ? inputTypeCastToScratch[inputType] : inputType;
+    }
+}
+export namespace MenuParser {
+    let stringArraySeparator = ",";
+    export function setSeparator(separator: string) {
+        stringArraySeparator = separator;
+    }
+    export function getSeparator() {
+        return stringArraySeparator;
+    }
+    export function trimSpace(item: string) {
+        return item.trim();
+    }
+    export function trimSpaceMenuItem(item: MenuItem): MenuItem {
+        return {
+            name: trimSpace(item.name),
+            value: trimSpace(item.value)
+        };
+    }
+    export function parseKeyValue(item: string | KeyValueString): MenuItem {
+        if (isKeyValueString(item)) {
+            let [name, value] = item.split("=");
+            return trimSpaceMenuItem({ name, value });
+        } else {
+            return trimSpaceMenuItem({ name: item, value: item });
+        }
+    }
+    export function splitStringArray(item: string) {
+        return item.split(stringArraySeparator).map(trimSpace);
+    }
+    export function isStringArray(item: MenuDefine) {
+        return typeof item === "string" && item.includes(stringArraySeparator);
+    }
+    export function isKeyValueString(item: MenuDefine) {
+        return typeof item === "string" && item.includes("=") && !isStringArray(item);
+    }
+    export function normalize(items: MenuDefine): MenuItem[] {
+        let result: MenuItem[] = [];
+        if (typeof items === "string") {
+            if (isKeyValueString(items)) {
+                result.push(parseKeyValue(items));
+            } else if (isStringArray(items)) {
+                splitStringArray(items).forEach(item => {
+                    result.push(parseKeyValue(item));
+                });
+            } else {
+                result.push(parseKeyValue(items));
+            };
+        } else if (Array.isArray(items)) {
+            items.forEach(item => {
+                normalize(item).forEach(item => {
+                    result.push(item);
+                });
+            });
+        } else {
+            result.push(trimSpaceMenuItem(items));
+        };
+        return result;
     }
 }

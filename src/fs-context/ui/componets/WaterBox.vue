@@ -20,12 +20,11 @@
                         <span v-if="arg.type === 'text'" class="text">{{ arg.content }}</span>
                         <span v-if="arg.type === 'input'" class="label">{{ arg.content }}:</span>
                         <input type="text" v-if="arg.type === 'input' && arg.inputType !== 'menu'" :value="arg.value"
-                            class="inputer" />
+                            class="inputer" @input="autoWidthInput" />
                         <select v-if="arg.type === 'input' && arg.inputType === 'menu'" class="inputer select" :style="{
                             backgroundColor: colorInputer,
                             borderColor: colorMenu
-                        }"
-                            :value="findMenu(arg.value).items[0].value ? findMenu(arg.value).items[0].value : findMenu(arg.value).items[0].name">
+                        }" :value="findMenu(arg.value).items[0].value">
                             <option v-for="option in findMenu(arg.value).items"
                                 :value="option.value ? option.value : option.name">{{ option.name }}</option>
                         </select>
@@ -37,53 +36,75 @@
 </template>
 <script>
 console.log("WaterBox loading");
+export default {
+    data() {
+        return {
+            extensionLoaded: false,
+            colorBlock: "#000000",
+            colorInputer: "#000000",
+            colorMenu: "#000000",
+            blocks: [],
+            menus: [],
+            extName: "",
+            extId: ""
+        }
+    },
+    methods: {
+        findMenu(id) {
+            return id instanceof Menu ? id : this.menus.find(m => m.id === id);
+        },
+        reloadExtension() {
+            this.extensionLoaded = false;
+            import("../../entry").then(async (e) => {
+                await e.result;
+                let ext = window.ScratchWaterBoxed.currentExtensionPlain;
+                ext.calcColor();
+                this.colorBlock = ext.colors.block;
+                this.colorInputer = ext.colors.inputer;
+                this.colorMenu = ext.colors.menu;
+                this.blocks = ext.blocks;
+                this.menus = ext.menus;
+                this.extName = ext.displayName;
+                this.extId = ext.id;
+                setTimeout(() => {
+                    this.extensionLoaded = true;
+                    console.log(this.$refs);
+                }, 500);
+            });
+        },
+        copyExtensionUrl() {
+            let url = window.location.protocol + "//" + window.location.hostname + ":" + serverConfig.extension.port + "/" + serverConfig.extension.output + ".dist.js";
+            try {
+                navigator.clipboard.writeText(url);
+                alert("已复制");
+            }
+            catch (e) {
+                alert("已尝试自动复制，但复制失败，请手动选中复制：\n" + url + `\n${e}`);
+            }
+        },
+        autoWidthInput(e) {
+            let target = e.target;
+            let tempSpan = document.createElement('span');
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.whiteSpace = 'pre';
+            tempSpan.style.font = window.getComputedStyle(target).font;
+            tempSpan.textContent = target.value;
+            document.body.appendChild(tempSpan);
+            target.style.width = (tempSpan.offsetWidth + 5) + 'px';
+            document.body.removeChild(tempSpan);
+        }
+    },
+    mounted() {
+        this.reloadExtension();
+    }
+}
 </script>
 <script setup>
+import "../../declare";
 import ScratchBlock from "./ScratchBlock.vue";
-import { ref } from "vue";
 import ScratchStage from "./ScratchStage.vue";
-import { Menu } from "@framework/structs";
-import serverConfig from "@config/server";
-function reloadExtension() {
-    extensionLoaded.value = false;
-    import("../../entry").then(async (e) => {
-        await e.result;
-        let ext = window.ScratchWaterBoxed.currentExtensionPlain;
-        ext.calcColor();
-        colorBlock.value = ext.colors.block;
-        colorInputer.value = ext.colors.inputer;
-        colorMenu.value = ext.colors.menu;
-        blocks.value = ext.blocks;
-        menus.value = ext.menus;
-        extName.value = ext.displayName;
-        extId.value = ext.id;
-        setTimeout(() => {
-            extensionLoaded.value = true;
-        }, 500);
-    });
-}
-function copyExtensionUrl() {
-    let url = window.location.protocol + "//" + window.location.hostname + ":" + serverConfig.extension.port + "/" + serverConfig.extension.output + ".dist.js";
-    try {
-        navigator.clipboard.writeText(url);
-        alert("已复制");
-    }
-    catch (e) {
-        alert("已尝试自动复制，但复制失败，请手动选中复制：\n" + url + `\n${e}`);
-    }
-}
-function findMenu(name) {
-    return name instanceof Menu ? name : menus.value.find(menu => menu.name === name);
-}
-var colorBlock = ref("orange");
-var colorInputer = ref("purple");
-var colorMenu = ref("pink");
-var blocks = ref([]);
-var menus = ref([]);
-var extName = ref("");
-var extId = ref("");
-var extensionLoaded = ref(false);
-reloadExtension();
+import serverConfig from "../../../../config/server";
+import { Menu } from "../../structs";
 </script>
 <style scoped>
 .container {
@@ -152,6 +173,11 @@ button:hover {
     background-color: white;
     padding: 5px;
     border-radius: 5px;
+    min-width: 40px;
+}
+
+input {
+    width: 40px;
 }
 
 .select {

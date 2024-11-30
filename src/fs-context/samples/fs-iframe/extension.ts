@@ -63,8 +63,8 @@ export default class FSIFrame extends Extension {
                 console.log(this);
                 if (this.canvas) {
                     iframe
-                        .style("width", `${this.canvas.clientWidth * iframe.readData("ratio-x")}px`)
-                        .style("height", `${this.canvas.clientHeight * iframe.readData("ratio-y")}px`);
+                        .style("width", `${this.canvas.clientWidth * iframe.data("ratio-x")}px`)
+                        .style("height", `${this.canvas.clientHeight * iframe.data("ratio-y")}px`);
                 }
             }, 100);
         }),
