@@ -1,6 +1,6 @@
 type LoaderConfig = import("@framework/internal").LoaderConfig;
 const config: LoaderConfig = {
-    target: import("@src/extension"),
+    target: import("@samples/fs-mdown/extension"),
     errorCatches: [],
     platform: ["TurboWarp"]
 }

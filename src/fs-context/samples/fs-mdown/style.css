@@ -1,0 +1,11 @@
+.fsi-base {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.fsi-iframe {
+    position: absolute;
+    border:none;
+    outline:none;
+}
