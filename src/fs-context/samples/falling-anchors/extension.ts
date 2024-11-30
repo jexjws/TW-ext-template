@@ -147,23 +147,6 @@ export default class FallingAnchors extends Extension {
             component.element.style(arg.$attr, arg.$value);
         })
     ];
-    menus = [
-        new Menu("exampleA", "abc,defg,gh,i"),
-        new Menu("exampleB", "abc=ABCaaabcc,defg,gh=GH,i=I"),
-        new Menu("exampleC", [
-            "abcdefg",
-            "hijklmnop",
-            {
-                name: "qwer",
-                value: "QWER"
-            },
-            {
-                name: "asdf",
-                value: "ASDF"
-            },
-            "zxcv=APple"
-        ])
-    ];
     init(runtime: Scratch) {
         runtime.renderer.canvas.parentElement?.appendChild(dataStore.read("rootBase").result);
     }
