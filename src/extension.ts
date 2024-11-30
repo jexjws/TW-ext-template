@@ -70,7 +70,18 @@ export default class MyExtension extends Extension {
             { name: "香蕉", value: "banana" },
             { name: "橙子", value: "orange" },
             { name: "西瓜", value: "watermelon" }
-        ])
+        ]),
+        new Menu("vegetables", [
+            "土豆=potato",
+            "胡萝卜=carrot",
+            "Unnamed vegitable",
+            {
+                name: "Named vegitable of Onion",
+                value: "onion"
+            },
+            "Cabbage白菜"
+        ]),
+        new Menu("sauces", "番茄酱=ketchup,蛋黄酱=mayonnaise,mushroom,辣椒酱=hot sauce")
     ]
     description = translator.load("des");
     collaborators = [

@@ -51,7 +51,7 @@ export default {
     },
     methods: {
         findMenu(id) {
-            return id instanceof Menu ? id : this.menus.find(m => m.id === id);
+            return id instanceof Menu ? id : this.menus.find(m => m.name === id);
         },
         reloadExtension() {
             this.extensionLoaded = false;
@@ -68,8 +68,7 @@ export default {
                 this.extId = ext.id;
                 setTimeout(() => {
                     this.extensionLoaded = true;
-                    console.log(this.$refs);
-                }, 500);
+                }, 100);
             });
         },
         copyExtensionUrl() {

@@ -149,19 +149,19 @@ export default class FallingAnchors extends Extension {
     ];
     menus = [
         new Menu("exampleA", "abc,defg,gh,i"),
-        new Menu("exampleB", " abc =  ABCaaabcc, defg, gh =GH,i= I"),
+        new Menu("exampleB", "abc=ABCaaabcc,defg,gh=GH,i=I"),
         new Menu("exampleC", [
-            "abcdefg  ",
-            " hijklmnop",
+            "abcdefg",
+            "hijklmnop",
             {
-                name: " qwer",
-                value: " QWER"
+                name: "qwer",
+                value: "QWER"
             },
             {
-                name: "asdf ",
+                name: "asdf",
                 value: "ASDF"
             },
-            "zxcv= APple"
+            "zxcv=APple"
         ])
     ];
     init(runtime: Scratch) {
