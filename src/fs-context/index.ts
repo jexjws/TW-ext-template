@@ -57,7 +57,9 @@ export namespace Extensions {
                         args[arg.content] = currentArg;
                     }
                 }
-                this[currentBlock.opcode] = (arg: any) => JSON.stringify(block.method.call(ext, arg));
+                this[currentBlock.opcode] = Unnecessary.isAsyncFunction(block.method)
+                    ? async (arg: any) => JSON.stringify(await block.method.call(ext, arg))
+                    : (arg: any) => JSON.stringify(block.method.call(ext, arg));
                 blocks.push(currentBlock);
             }
             let menus: any = {};

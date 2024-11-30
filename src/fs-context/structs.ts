@@ -67,8 +67,8 @@ export class Block {
             let current = _arguments.find(e => e.name === args[i]) as ArgumentDefine;
             if (current) {
                 textLoaded.push(current);
-            }
-        }
+            };
+        };
         return new Block({
             method: realMethod,
             type: realConfig.type,

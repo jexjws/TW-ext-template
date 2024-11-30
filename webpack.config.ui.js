@@ -25,7 +25,7 @@ module.exports = {
                 use: ["vue-style-loader", "css-loader"]
             },
             {
-                test: /\.html$/i,
+                test: /\.(html|md)$/i,
                 use: "raw-loader"
             }
         ]

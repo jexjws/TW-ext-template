@@ -20,7 +20,7 @@
                         <span v-if="arg.type === 'text'" class="text">{{ arg.content }}</span>
                         <span v-if="arg.type === 'input'" class="label">{{ arg.content }}:</span>
                         <input type="text" v-if="arg.type === 'input' && arg.inputType !== 'menu'" :value="arg.value"
-                            class="inputer" @input="autoWidthInput" />
+                            class="inputer" @input="autoWidthInput" @load="autoWidthInput" />
                         <select v-if="arg.type === 'input' && arg.inputType === 'menu'" class="inputer select" :style="{
                             backgroundColor: colorInputer,
                             borderColor: colorMenu

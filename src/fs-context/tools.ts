@@ -103,7 +103,6 @@ export namespace Unnecessary {
         }
     }
     export function splitArgBoxPart(str: string, substrings: string[]) {
-        const substringSet = new Set(substrings);
         const filteredSubstrings = [];
         for (let i = 0; i < str.length; i++) {
             for (const substring of substrings) {
@@ -151,6 +150,9 @@ export namespace Unnecessary {
             "hat-paramater": "ccw_hat_parameter"
         };
         return Object.hasOwn(inputTypeCastToScratch, inputType) ? inputTypeCastToScratch[inputType] : inputType;
+    }
+    export function isAsyncFunction(func: Function) {
+        return func.constructor.name === "AsyncFunction";
     }
 }
 export namespace MenuParser {

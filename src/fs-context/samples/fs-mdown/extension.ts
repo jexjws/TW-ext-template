@@ -2,8 +2,23 @@ import { ElementContext, Scratch } from "@framework/internal";
 import { Block, Collaborator, Extension, Translator, Version } from "@framework/structs";
 import { GlobalContext, Unnecessary } from "@framework/tools";
 import "./style.css";
+import "highlight.js/styles/github.min.css";
 import MDRendererHTML from "./markdown.html";
+import defaultTextImported from "./default.md";
 import marked from "marked";
+import highlight from "highlight.js";
+const defaultText = defaultTextImported.replaceAll("\n", "\\n");
+let colorStyle: HTMLStyleElement;
+for (let i in document.styleSheets) {
+    let current = document.styleSheets[i];
+    for (let j in current.cssRules) {
+        let rule = current.cssRules[j] as CSSStyleRule;
+        if (rule.selectorText === "pre code.hljs") {
+            colorStyle = current.ownerNode as HTMLStyleElement;
+            break;
+        };
+    };
+};
 let translator = Translator.create("zh-cn", {
     name: "内嵌Markdown",
     description: "使用markdown嵌入网页",
@@ -39,7 +54,7 @@ export default class FSIFrame extends Extension {
                 },
                 {
                     name: "$size",
-                    value: "480 270"
+                    value: "640 360"
                 },
                 {
                     name: "$layer",
@@ -68,7 +83,7 @@ export default class FSIFrame extends Extension {
                     iframe
                         .style("width", `${this.canvas.clientWidth * iframe.data("ratio-x")}px`)
                         .style("height", `${this.canvas.clientHeight * iframe.data("ratio-y")}px`);
-                }
+                };
             }, 100);
         }),
         Block.create(translator.load("setUrl"), {
@@ -78,16 +93,23 @@ export default class FSIFrame extends Extension {
                 },
                 {
                     name: "$url",
-                    value: "# 你好，世界！"
+                    value: defaultText
                 }
             ]
-        }, function setUrl(arg) {
-            marked.marked(arg.$url.replaceAll("\\n", "\n"), { async: true }).then((html) => {
-                let ele = (document.getElementById(`fsiframe-${arg.$name}`) as HTMLIFrameElement)
-                    .contentWindow?.document
-                    .getElementById("show");
-                ele && (ele.innerHTML = html);
-            });
+        }, async function setUrl(arg) {
+            let html = await marked.marked(arg.$url.replaceAll("\\n", "\n"), { async: true })
+            let doc = (document.getElementById(`fsiframe-${arg.$name}`) as HTMLIFrameElement)
+                .contentWindow?.document;
+            if (doc) {
+                doc.head.appendChild(colorStyle);
+                let ele = doc.getElementById("show");
+                if (ele) {
+                    ele.innerHTML = html;
+                    doc.querySelectorAll("code").forEach((ele) => {
+                        highlight.highlightElement(ele);
+                    });
+                };
+            };
         }),
         Block.create(translator.load("move"), {
             arguments: [

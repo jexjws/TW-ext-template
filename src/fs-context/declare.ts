@@ -1,5 +1,7 @@
 declare module "*.vue";
 declare module "*.html";
+declare module "*.md";
+declare module "*.css";
 declare interface Window {
     ScratchWaterBoxed?: import("./internal").ScratchWaterBoxed;
     Scratch?: import("./internal").Scratch;
