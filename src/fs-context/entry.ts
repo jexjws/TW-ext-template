@@ -1,13 +1,15 @@
 import { Extensions } from "."
 export default async function load() {
-    let currentScratch = Extensions.getScratch() as import("@framework/internal").ScratchWaterBoxed;
+    const currentScratch = Extensions.getScratch() as import("@framework/internal").ScratchWaterBoxed;
     if (currentScratch) {
-        let loaderConfig = Extensions.config.loader;
-        let { default: target } = await loaderConfig.target;
-        let extensionLoaded = await Extensions.load(target);
+        const loaderConfig = Extensions.config.loader;
+        const { default: target } = await loaderConfig.target;
+        const extensionLoaded = await Extensions.load(target);
         extensionLoaded.debugPrint();
         extensionLoaded.to(...loaderConfig.platform);
-        Extensions.isInWaterBoxed() ? currentScratch.loadTempExt() : null;
+        if (Extensions.isInWaterBoxed()) {
+            currentScratch.loadTempExt();
+        };
     };
 };
 export const result = load();

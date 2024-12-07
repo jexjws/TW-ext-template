@@ -1,8 +1,8 @@
 import { ElementContext, Scratch } from "@framework/internal";
 import { Block, Extension, Menu, Translator } from "@framework/structs";
-import { GlobalContext, MenuParser, Unnecessary } from "@framework/tools";
+import { GlobalContext, Unnecessary } from "@framework/tools";
 import "./style.css";
-let translator = Translator.create("zh-cn", {
+const translator = Translator.create("zh-cn", {
     name: "沉沦之锚",
     description: "使用锚点机制构建可自适应的精美UI。可与「高级数据结构」联动使用。",
     clear: "清除所有组件",
@@ -87,13 +87,13 @@ export default class FallingAnchors extends Extension {
                 }
             ]
         }, function renderComponent(arg) {
-            let component = findComponent(arg.$name);
+            const component = findComponent(arg.$name);
             if (!component) { return; };
             if (component.isInStage && component.currentRenderingTree) {
                 dataStore.read("rootBase").result.removeChild(component.currentRenderingTree);
             };
             component.updateStyle();
-            let tree = generateDomTree(component);
+            const tree = generateDomTree(component);
             dataStore.read("rootBase").child(tree);
             component.currentRenderingTree = tree;
             component.isInStage = true;
@@ -108,8 +108,8 @@ export default class FallingAnchors extends Extension {
                 }
             ]
         }, function appendComponent(arg) {
-            let component = findComponent(arg.$name);
-            let parent = findComponent(arg.$parent);
+            const component = findComponent(arg.$name);
+            const parent = findComponent(arg.$parent);
             if (!component || !parent || parent.childs.includes(component)) { return; };
             parent.childs.push(component);
             component.isInStage = false;
@@ -142,7 +142,7 @@ export default class FallingAnchors extends Extension {
                 }
             ]
         }, function setAttr(arg) {
-            let component = findComponent(arg.$name);
+            const component = findComponent(arg.$name);
             if (!component) { return; };
             component.element.style(arg.$attr, arg.$value);
         })
@@ -153,7 +153,7 @@ export default class FallingAnchors extends Extension {
 };
 function parseVector(target: `${number} ${number}`): Vector {
     if (typeof target !== "string") { return createZeroVector(); };
-    let splited = target.split(" ");
+    const splited = target.split(" ");
     if (splited.length !== 2) { return createZeroVector(); };
     return { horizontal: Number(splited[0]), vertical: Number(splited[1]) };
 };
@@ -164,7 +164,7 @@ function findComponent(name: string): Componet | null {
     return dataStore.read("componets").find(component => component.name === name) || null;
 };
 function generateDomTree(target: Componet): HTMLElement {
-    let result = target.element.result.cloneNode() as HTMLElement;
+    const result = target.element.result.cloneNode() as HTMLElement;
     target.childs.forEach(child => result.appendChild(generateDomTree(child)));
     return result;
 };
@@ -184,7 +184,7 @@ interface Componet {
     updateStyle: () => void;
     currentRenderingTree: HTMLElement | null;
 };
-let dataStore = GlobalContext.createDataStore(FallingAnchors, {
+const dataStore = GlobalContext.createDataStore(FallingAnchors, {
     componets: [] as Componet[],
     rootBase: Unnecessary.elementTree("div").class("fsa", "base")
 });

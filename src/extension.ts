@@ -1,7 +1,7 @@
-import { ColorDefine } from "@framework/internal";
-import { Block, Collaborator, Extension, Menu, Translator, Version } from "@framework/structs";
+import { AnyArg, ColorDefine } from "@framework/internal";
+import { Block, BlockTypes, Collaborator, Extension, Menu, Translator, Version } from "@framework/structs";
 import { GlobalContext, Unnecessary } from "@framework/tools";
-let translator = Translator.create("zh-cn", {
+const translator = Translator.create("zh-cn", {
     name: "我的拓展",
     des: "这是我的第一个拓展",
     alert: "向窗口中弹窗$sth，后缀为_suffix",
@@ -44,7 +44,6 @@ export default class MyExtension extends Extension {
                 alert(args.$sth + " " + args._suffix);
                 dataStore.write("alertedSth", args.$sth.toString());
                 dataStore.write("lastSuffix", args._suffix.toString());
-                console.log(dataStore.read("tools"));
             }
         ),
         Block.create(
@@ -91,8 +90,22 @@ export default class MyExtension extends Extension {
         theme: "#ff0000"
     };
     autoDeriveColors = true;
+    @BlockTypes.Command("alert[sth:string=hello]with suffix[suffix:menu=suffixes]")
+    alertTest(args: AnyArg) {
+        alert(args.sth + " " + args.suffix);
+        dataStore.write("alertedSth", args.sth.toString());
+        dataStore.write("lastSuffix", args.suffix.toString());
+    }
+    @BlockTypes.Reporter("getAlertedSth")
+    getAlertedSth() {
+        return dataStore.read("alertedSth");
+    }
+    @BlockTypes.Reporter("getLastSuffix")
+    getLastSuffix() {
+        return dataStore.read("lastSuffix");
+    }
 }
-let dataStore = GlobalContext.createDataStore(MyExtension, {
+const dataStore = GlobalContext.createDataStore(MyExtension, {
     alertedSth: [] as string[],
     lastSuffix: "",
     tools: Unnecessary,

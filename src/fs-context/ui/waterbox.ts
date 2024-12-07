@@ -14,7 +14,7 @@ window.ScratchWaterBoxed = {
     currentExtension: null,
     loadTempExt() {
         if (window.tempExt && window.ScratchWaterBoxed) {
-            let ext = new window.tempExt.Extension(window.ScratchWaterBoxed);
+            const ext = new window.tempExt.Extension(window.ScratchWaterBoxed);
             window.ScratchWaterBoxed.currentExtension = ext;
             window.tempExt = undefined;
         }

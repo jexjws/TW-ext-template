@@ -14,19 +14,22 @@
                 <button @click="copyExtensionUrl()">复制拓展脚本url</button>
             </div>
             <div class="blocks">
-                <ScratchBlock v-for="block in blocks" :colorBlock="colorBlock" :colorInputer="colorInputer"
-                    :colorMenu="colorMenu" :opcode="block.opcode" :type="block.type" :unparsedText="block.text">
-                    <span v-for="arg in block.arguments" :class="{ 'texts': true, 'input': arg.type === 'input' }">
+                <ScratchBlock v-for="block in blocks" :key="block.opcode" :colorBlock="colorBlock"
+                    :colorInputer="colorInputer" :colorMenu="colorMenu" :opcode="block.opcode" :type="block.type"
+                    :unparsedText="block.text">
+                    <span v-for="arg in block.arguments" :key="arg"
+                        :class="{ 'texts': true, 'input': arg.type === 'input' }">
                         <span v-if="arg.type === 'text'" class="text">{{ arg.content }}</span>
-                        <span v-if="arg.type === 'input'" class="label">{{ arg.content }}:</span>
+                        <span v-if="arg.type === 'input'" class="label">({{ arg.inputType }}) {{ arg.content }}:</span>
                         <input type="text" v-if="arg.type === 'input' && arg.inputType !== 'menu'" :value="arg.value"
-                            class="inputer" @input="autoWidthInput" @load="autoWidthInput" />
+                            class="inputer" @input="autoWidthInput" />
                         <select v-if="arg.type === 'input' && arg.inputType === 'menu'" class="inputer select" :style="{
                             backgroundColor: colorInputer,
                             borderColor: colorMenu
                         }" :value="findMenu(arg.value).items[0].value">
                             <option v-for="option in findMenu(arg.value).items"
-                                :value="option.value ? option.value : option.name">{{ option.name }}</option>
+                                :value="option.value ? option.value : option.name" :key="option">{{ option.name }}
+                            </option>
                         </select>
                     </span>
                 </ScratchBlock>
@@ -66,6 +69,7 @@ export default {
                 this.menus = ext.menus;
                 this.extName = ext.displayName;
                 this.extId = ext.id;
+                document.querySelectorAll("input").forEach(i => this.autoWidthInput({ target: i }))
                 setTimeout(() => {
                     this.extensionLoaded = true;
                 }, 100);
@@ -82,7 +86,7 @@ export default {
             }
         },
         autoWidthInput(e) {
-            let target = e.target;
+            let { target } = e;
             let tempSpan = document.createElement('span');
             tempSpan.style.visibility = 'hidden';
             tempSpan.style.whiteSpace = 'pre';

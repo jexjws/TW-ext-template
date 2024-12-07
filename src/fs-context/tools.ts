@@ -1,10 +1,22 @@
 import md5 from "md5";
-import { ElementContext, GlobalResourceMachine, HexColorString, InputType, KeyValueString, MenuDefine, MenuItem } from "./internal";
+import {
+    AcceptedInputType,
+    ArgumentPart,
+    ElementContext,
+    GlobalResourceMachine,
+    HexColorString,
+    InputType,
+    KeyValueString,
+    MenuDefine,
+    MenuItem,
+    InputTypeCastConstructor,
+    AcceptedMenuValue
+} from "./internal";
 import { DataStorer, Extension } from "./structs";
 export namespace GlobalContext {
-    let context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
-    export function createDataStore<T extends { [key: string]: any }>(forExt: new () => Extension, datas: T): DataStorer<T> {
-        let { id } = new forExt;
+    const context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
+    export function createDataStore<T extends { [key: string]: any }>(forExt: typeof Extension, datas: T): DataStorer<T> {
+        const { id } = forExt.onlyInstance;
         if (Object.hasOwn(context.EXPORTED, id)) {
             throw new Error(`Data store for FSExtenion "${id}" is already exists.`);
         }
@@ -31,7 +43,7 @@ export namespace Unnecessary {
         tag: T,
         childs: ElementContext[] = []
     ): ElementContext<HTMLElementTagNameMap[T]> {
-        let result = document.createElement(tag);
+        const result = document.createElement(tag);
         childs.forEach(child => result.appendChild(child.result));
         return {
             result,
@@ -91,7 +103,7 @@ export namespace Unnecessary {
         private last: number = 1;
         private length: number = 4;
         next(): string {
-            let result = [];
+            const result = [];
             for (let i = 0; i < this.length; i++) {
                 this.last++;
                 result.push(md5(this.last + i.toString()).slice(0, 5));
@@ -123,7 +135,7 @@ export namespace Unnecessary {
     }
     export function hexToRgb(str: HexColorString): [number, number, number] {
         let hexs: any[] = [];;
-        let reg = /^\#?[0-9A-Fa-f]{6}$/;
+        const reg = /^#?[0-9A-Fa-f]{6}$/;
         if (!reg.test(str)) throw new Error('Invalid hex color string');
         str = str.replace('#', '') as HexColorString;
         hexs = str.match(/../g) || [];
@@ -131,14 +143,14 @@ export namespace Unnecessary {
         return [parseInt(hexs[0], 16), parseInt(hexs[1], 16), parseInt(hexs[2], 16)];
     }
     export function darken(color: HexColorString, level: number): HexColorString {
-        let rgb = hexToRgb(color);
+        const rgb = hexToRgb(color);
         for (let i = 0; i < 3; i++) {
             rgb[i] = Math.floor(rgb[i] - (rgb[i] * level))
         }
         return `#${rgb.map((i) => i.toString(16).padStart(2, "0")).join('')}`;
     }
     export function lighten(color: HexColorString, level: number): HexColorString {
-        let rgb = hexToRgb(color);
+        const rgb = hexToRgb(color);
         for (let i = 0; i < 3; i++) {
             rgb[i] = Math.floor(rgb[i] + (255 - rgb[i]) * level)
         }
@@ -151,7 +163,7 @@ export namespace Unnecessary {
         };
         return Object.hasOwn(inputTypeCastToScratch, inputType) ? inputTypeCastToScratch[inputType] : inputType;
     }
-    export function isAsyncFunction(func: Function) {
+    export function isAsyncFunction(func: (...args: any[]) => any) {
         return func.constructor.name === "AsyncFunction";
     }
 }
@@ -163,18 +175,18 @@ export namespace MenuParser {
     export function getSeparator() {
         return stringArraySeparator;
     }
-    export function trimSpace(item: string) {
-        return item.trim();
+    export function trimSpace(item: AcceptedMenuValue) {
+        return typeof item === "string" ? item.trim() : item;
     }
     export function trimSpaceMenuItem(item: MenuItem): MenuItem {
         return {
-            name: trimSpace(item.name),
+            name: trimSpace(item.name) as string,
             value: trimSpace(item.value)
         };
     }
     export function parseKeyValue(item: string | KeyValueString): MenuItem {
         if (isKeyValueString(item)) {
-            let [name, value] = item.split("=");
+            const [name, value] = item.split("=");
             return trimSpaceMenuItem({ name, value });
         } else {
             return trimSpaceMenuItem({ name: item, value: item });
@@ -190,13 +202,13 @@ export namespace MenuParser {
         return typeof item === "string" && item.includes("=") && !isStringArray(item);
     }
     export function normalize(items: MenuDefine): MenuItem[] {
-        let result: MenuItem[] = [];
+        const result: MenuItem[] = [];
         if (typeof items === "string") {
             if (isKeyValueString(items)) {
                 result.push(parseKeyValue(items));
             } else if (isStringArray(items)) {
                 splitStringArray(items).forEach(item => {
-                    result.push(parseKeyValue(item));
+                    result.push(parseKeyValue(item as string));
                 });
             } else {
                 result.push(parseKeyValue(items));
@@ -211,5 +223,64 @@ export namespace MenuParser {
             result.push(trimSpaceMenuItem(items));
         };
         return result;
+    }
+}
+export namespace TextParser {
+    export const regex = /(\[.*?\])|(\$.*?;)/g;
+    export function split(target: string): { text: string[], arg: string[] } {
+        const arg: string[] = target.match(regex) || [];
+        const text: string[] = target.split(regex);
+        return {
+            text: text.filter(item => item !== undefined).filter((_, index) => index % 2 === 0),
+            arg: arg.filter(Boolean).map(item => item.slice(1, -1))
+        };
+    }
+    export function parsePart(text: string): ArgumentPart[] {
+        const result: ArgumentPart[] = [];
+        const parts = split(text);
+        parts.text.forEach((item, index) => {
+            if (!item) { return; };
+            result.push(new ArgumentPart(item, "text"));
+            if (parts.arg.length > index) {
+                result.push(new ArgumentPart(
+                    parseName(parts.arg[index]),
+                    "input",
+                    parseDefaultValue(parts.arg[index]),
+                    parseType(parts.arg[index])
+                ));
+            };
+        });
+        return result;
+    }
+    export function hasType(arg: string) {
+        return arg.includes(":");
+    }
+    export function hasDefaultValue(arg: string) {
+        return arg.includes("=");
+    }
+    export function parseType(arg: string): InputType {
+        if (!hasType(arg)) {
+            return "string";
+        };
+        const splited = arg.split(":");
+        splited.shift();
+        let result = splited.join(":");
+        if (hasDefaultValue(arg)) {
+            result = result.split("=", 1)[0];
+        };
+        if (!AcceptedInputType.includes(result)) {
+            throw new Error(`Invalid input type: ${result}`);
+        };
+        return result as InputType;
+    }
+    export function parseDefaultValue(arg: string): any | undefined {
+        if (!hasDefaultValue(arg)) {
+            return;
+        };
+        const result = arg.split("=").pop();
+        return InputTypeCastConstructor[parseType(arg)](result);
+    }
+    export function parseName(arg: string): string {
+        return arg.split(/[:=]/)[0];
     }
 }

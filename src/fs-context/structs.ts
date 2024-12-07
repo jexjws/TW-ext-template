@@ -1,7 +1,24 @@
 import { Extensions } from ".";
-import { ArgumentDefine, ArgumentPart, BlockType, ColorDefine, MethodFunction, MenuItem, TranslatorStoredData, LanguageSupported, LanguageStored, BlockConfigB, ExtractField, Scratch, ObjectInclude, VersionString, KeyValueString } from "./internal";
+import {
+    ArgumentDefine,
+    ArgumentPart,
+    BlockType,
+    ColorDefine,
+    MethodFunction,
+    MenuItem,
+    TranslatorStoredData,
+    LanguageSupported,
+    LanguageStored,
+    BlockConfigB,
+    ExtractField,
+    Scratch,
+    ObjectInclude,
+    VersionString,
+    BlockConfigA,
+    MenuDefine
+} from "./internal";
 import md5 from "md5";
-import { MenuParser, Unnecessary } from "./tools";
+import { MenuParser, TextParser, Unnecessary } from "./tools";
 export class Extension {
     id: string = "example-extension";
     displayName: string = "Example extension";
@@ -16,8 +33,13 @@ export class Extension {
     colors: ColorDefine = {
         theme: "#FF0000"
     };
-    runtime: Scratch | null = null;
-    canvas: HTMLCanvasElement | null = null;
+    runtime?: Scratch;
+    canvas?: HTMLCanvasElement;
+    private static instance?: Extension;
+    static get onlyInstance(): Extension {
+        if (!this.instance) this.instance = new this(true);
+        return this.instance;
+    };
     calcColor() {
         if (this.autoDeriveColors) {
             if (this.colors.theme) {
@@ -29,8 +51,15 @@ export class Extension {
             }
         }
         return this.colors;
+    };
+    init(runtime?: Scratch): any {
+        this.runtime = runtime;
+    };
+    constructor(ignoreError: boolean = false) {
+        if (!ignoreError) {
+            throw new Error("Extension can not be instantiated directly.");
+        };
     }
-    init(runtime: Scratch): any { runtime }
 }
 export class Block {
     method: MethodFunction<any> = () => { };
@@ -42,7 +71,7 @@ export class Block {
     }
     get text(): string {
         let result: string = "";
-        for (let arg of this.arguments) {
+        for (const arg of this.arguments) {
             if (arg.type === "text") {
                 result += arg.content;
             } else {
@@ -56,15 +85,15 @@ export class Block {
         config: T,
         method?: (this: Extension, arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
     ) {
-        let realConfig: BlockConfigB<ArgumentDefine[]> = { arguments: config.arguments || [], ...config };
-        let _arguments = realConfig.arguments as ArgumentDefine[];
-        let realMethod = method || (() => { }) as any;
-        let textLoaded: (string | ArgumentDefine)[] = [];
-        let messages = Unnecessary.splitTextPart(text, _arguments.map(i => i.name));
-        let args = Unnecessary.splitArgBoxPart(text, _arguments.map(i => i.name));
+        const realConfig: BlockConfigB<ArgumentDefine[]> = { arguments: config.arguments || [], ...config };
+        const _arguments = realConfig.arguments as ArgumentDefine[];
+        const realMethod = method || (() => { }) as any;
+        const textLoaded: (string | ArgumentDefine)[] = [];
+        const messages = Unnecessary.splitTextPart(text, _arguments.map(i => i.name));
+        const args = Unnecessary.splitArgBoxPart(text, _arguments.map(i => i.name));
         for (let i = 0; i < messages.length; i++) {
             textLoaded.push(messages[i].replaceAll("[", "[").replaceAll("]", "]"));
-            let current = _arguments.find(e => e.name === args[i]) as ArgumentDefine;
+            const current = _arguments.find(e => e.name === args[i]) as ArgumentDefine;
             if (current) {
                 textLoaded.push(current);
             };
@@ -75,14 +104,13 @@ export class Block {
             opcode: method?.name
         }, ...textLoaded);
     }
-    constructor(config: any, ...args: any[]) {
-        let result = this;
+    constructor(config?: BlockConfigA<[]>, ...args: any[]) {
         for (let i = 0; i < args.length; i++) {
-            var currentPart: ArgumentPart;
+            let currentPart: ArgumentPart;
             if (typeof args[i] === "string") {
                 currentPart = new ArgumentPart(args[i] as string, "text");
             } else {
-                var currentArgument: ArgumentDefine = args[i] as ArgumentDefine;
+                const currentArgument: ArgumentDefine = args[i] as ArgumentDefine;
                 currentPart = new ArgumentPart(
                     currentArgument.name,
                     "input",
@@ -90,12 +118,18 @@ export class Block {
                     currentArgument.inputType
                 );
             }
-            result.arguments.push(currentPart);
+            this.arguments.push(currentPart);
         }
-        let data = config;
-        data.method && (result.method = data.method);
-        data.type && (result.type = data.type);
-        data.opcode && (result._opcode = data.opcode);
+        const data = config || {};
+        if (data.method) {
+            this.method = data.method;
+        };
+        if (data.type) {
+            this.type = data.type;
+        };
+        if (data.opcode) {
+            this._opcode = data.opcode;
+        };
     };
 }
 export class Collaborator {
@@ -110,10 +144,14 @@ export class Menu {
     acceptReporters: boolean = true;
     items: MenuItem[] = [];
     name: string;
-    constructor(name: string, items?: (MenuItem | string | KeyValueString)[] | string, acceptReporters?: boolean) {
+    constructor(name: string, items?: MenuDefine, acceptReporters?: boolean) {
         this.name = name;
-        acceptReporters && (this.acceptReporters = acceptReporters);
-        items && (this.items = MenuParser.normalize(items));
+        if (acceptReporters !== undefined) {
+            this.acceptReporters = acceptReporters;
+        };
+        if (items !== undefined) {
+            this.items = MenuParser.normalize(items);
+        };
     }
 }
 export class Translator<L extends LanguageSupported, D extends LanguageStored> {
@@ -124,7 +162,7 @@ export class Translator<L extends LanguageSupported, D extends LanguageStored> {
         this.stored[lang] = data;
     }
     load(keyword: keyof D): string {
-        let currentStore = this.stored[this.language] as D;
+        const currentStore = this.stored[this.language] as D;
         if (currentStore) {
             return currentStore[keyword] || this.unTranslatedText(keyword);
         } else {
@@ -132,11 +170,11 @@ export class Translator<L extends LanguageSupported, D extends LanguageStored> {
         };
     }
     unTranslatedText(keyword: keyof D) {
-        let currentStore = this.stored[this.defaultLanguage] as D;
+        const currentStore = this.stored[this.defaultLanguage] as D;
         return currentStore[keyword];
     }
     static create<T extends LanguageSupported, D extends LanguageStored>(lang: T, store: D): Translator<T, D> {
-        let result = new Translator<T, D>();
+        const result = new Translator<T, D>();
         result.defaultLanguage = lang;
         result.store(lang, store);
         return result;
@@ -171,7 +209,7 @@ export class Version {
     constructor(major: number, minor: number, patch: number)
     constructor(a: number | string = 1, b: number = 0, c: number = 0) {
         if (typeof a === "string") {
-            let parts = a.split(".");
+            const parts = a.split(".");
             this.major = parseInt(parts[0]);
             this.minor = parseInt(parts[1]);
             this.patch = parseInt(parts[2]);
@@ -192,5 +230,24 @@ export class Version {
         if (a.patch > b.patch) return a;
         if (a.patch < b.patch) return b;
         return a;
+    }
+}
+export namespace BlockTypes {
+    export function Plain(type: BlockType, text: string) {
+        return function (_: Extension, propertyKey: string, descriptor: PropertyDescriptor) {
+            const block = new Block({
+                opcode: propertyKey,
+                type,
+                method: descriptor.value
+            });
+            block.arguments = TextParser.parsePart(text);
+            Extensions.willBePushedInto.push(block);
+        };
+    }
+    export function Command(text: string) {
+        return Plain("command", text);
+    }
+    export function Reporter(text: string) {
+        return Plain("reporter", text);
     }
 }

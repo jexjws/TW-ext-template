@@ -2,7 +2,7 @@ import { ElementContext, Scratch } from "@framework/internal";
 import { Block, Collaborator, Extension, Translator, Version } from "@framework/structs";
 import { GlobalContext, Unnecessary } from "@framework/tools";
 import "./style.css";
-let translator = Translator.create("zh-cn", {
+const translator = Translator.create("zh-cn", {
     name: "内嵌网页",
     description: "使用iframe嵌入网页",
     create: "创建名为$name的Iframe于$pos，尺寸$size，图层$layer",
@@ -45,9 +45,9 @@ export default class FSIFrame extends Extension {
             ]
         }, function createIF(arg) {
             if (document.getElementById(`fsiframe-${arg.$name}`)) return;
-            let pos = parsePos(arg.$pos);
-            let size = parsePos(arg.$size);
-            let iframe = Unnecessary.elementTree("iframe")
+            const pos = parsePos(arg.$pos);
+            const size = parsePos(arg.$size);
+            const iframe = Unnecessary.elementTree("iframe")
                 .class("fsi-iframe")
                 .style("left", `${pos.x}px`)
                 .style("top", `${pos.y}px`)
@@ -93,8 +93,8 @@ export default class FSIFrame extends Extension {
                 }
             ]
         }, function move(arg) {
-            let pos = parsePos(arg.$pos);
-            let iframe = document.getElementById(`fsiframe-${arg.$name}`);
+            const pos = parsePos(arg.$pos);
+            const iframe = document.getElementById(`fsiframe-${arg.$name}`);
             iframe?.style.setProperty("left", `${pos.x}px`);
             iframe?.style.setProperty("top", `${pos.y}px`);
         }),
@@ -109,8 +109,8 @@ export default class FSIFrame extends Extension {
                 }
             ]
         }, function resize(arg) {
-            let size = parsePos(arg.$size);
-            let iframe = document.getElementById(`fsiframe-${arg.$name}`);
+            const size = parsePos(arg.$size);
+            const iframe = document.getElementById(`fsiframe-${arg.$name}`);
             iframe?.style.setProperty("width", `${size.x}px`);
             iframe?.style.setProperty("height", `${size.y}px`);
         }),
@@ -125,7 +125,7 @@ export default class FSIFrame extends Extension {
                 }
             ]
         }, function setLayer(arg) {
-            let iframe = document.getElementById(`fsiframe-${arg.$name}`);
+            const iframe = document.getElementById(`fsiframe-${arg.$name}`);
             iframe?.style.setProperty("zIndex", arg.$layer);
         }),
         Block.create(translator.load("remove"), {
@@ -145,13 +145,13 @@ export default class FSIFrame extends Extension {
     }
 };
 function parsePos(text: string): Position {
-    let arr = text.split(" ");
+    const arr = text.split(" ");
     return {
         x: Number(arr[0]),
         y: Number(arr[1])
     }
 }
-let dataStore = GlobalContext.createDataStore(FSIFrame, {
+const dataStore = GlobalContext.createDataStore(FSIFrame, {
     iframes: [] as ElementContext<HTMLIFrameElement>[],
     rootBase: Unnecessary.elementTree("div").class("fsi-base")
 });

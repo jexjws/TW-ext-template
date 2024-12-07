@@ -1,4 +1,4 @@
-import { Block, DataStorer, Extension, Version } from "./structs";
+import { Block, DataStorer, Extension, Menu, Version } from "./structs";
 export class ArgumentPart {
     content: string;
     type: ArgumentPartType;
@@ -17,10 +17,10 @@ export interface ArgumentDefine<T extends ValidArgumentName = ValidArgumentName>
     inputType?: InputType;
 }
 export type ValidArgumentName = `${"$" | "_"}${string}`;
-export type MethodFunction<T = any> = (this: Extension, args: T) => any;
+export type MethodFunction<T> = (this: Extension, args: T) => any;
 export interface Scratch {
     extensions: {
-        register: (target: new () => any) => void;
+        register: (target: ExtensionPlain) => void;
         unsandboxed?: boolean;
     },
     translate: ScratchTranslateFunction;
@@ -30,7 +30,7 @@ export interface Scratch {
 }
 export interface ScratchWaterBoxed extends Scratch {
     currentExtensionPlain: Extension | null;
-    currentExtension: any;
+    currentExtension: ExtensionPlain | null;
     loadTempExt: () => void;
 }
 export type BlockType = "command" | "reporter";
@@ -56,15 +56,16 @@ export interface ColorDefine {
     menu?: HexColorString;
     theme?: HexColorString;
 }
+export type AcceptedMenuValue = string | number | boolean | object;
 export interface MenuItem {
     name: string;
-    value: any;
+    value: AcceptedMenuValue;
 }
 export type InputTypeCast = {
     string: string;
     number: number;
     bool: boolean;
-    menu: any;
+    menu: Menu | string;
     angle: number;
     color: HexColorString;
     "hat-paramater": string;
@@ -77,12 +78,24 @@ export type PlatformSupported = "GandiIDE" | "TurboWarp";
 export type LanguageStored = { [key: string]: string; };
 export type ArgumentPartType = "text" | "input";
 export type InputType = "string" | "number" | "bool" | "menu" | "angle" | "color" | "hat-paramater";
+export const AcceptedInputType = ["string", "number", "bool", "menu", "angle", "color", "hat-paramater"];
+export const InputTypeCastConstructor = {
+    string: String,
+    number: Number,
+    bool: Boolean,
+    menu: String,
+    angle: Number,
+    color: String,
+    "hat-paramater": String,
+}
 export interface GlobalResourceMachine {
     EXTENSIONS: ObjectInclude<Version>;
     EXPORTED: { [key: string]: DataStorer }
 }
-export interface ScratchTranslateFunction extends Function {
+export interface ScratchTranslateFunction {
     language: LanguageSupported;
+    (key: string): string;
+    setup: (data: ObjectInclude<LanguageStored>) => void;
 }
 export interface StyleSetFunc<E extends HTMLElement> {
     <K extends keyof FilterWritableKeys<CSSStyleDeclaration>>
@@ -121,7 +134,7 @@ export type FilterWritableKeys<T> = {
 }
 export type If<C extends boolean, T, F> = C extends true ? T : F;
 export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? true : false;
-export type ObjectInclude<T, K extends string | number | symbol = string> = {
+export type ObjectInclude<T = any, K extends string | number | symbol = string> = {
     [key: string]: T;
 } & {
     [C in K]: T;
@@ -131,9 +144,9 @@ export type FilterKey<T, K> = {
     [P in keyof T as P extends K ? never : P]: never;
 }
 export type FilterOut<T, U> = T extends U ? never : T;
-export type AcceptedArgType = InputTypeCast[FilterOut<keyof InputTypeCast, "">];
+export type AcceptedArgType = InputTypeCast[FilterOut<InputType, "">];
 export interface LoaderConfig {
-    target: Promise<{ default: new () => Extension }>;
+    target: Promise<{ default: typeof Extension }>;
     errorCatches: string[];
     platform: PlatformSupported[];
 }
@@ -141,3 +154,37 @@ export type KeyValueString<T extends string = "="> = `${string}${T}${string}`;
 export type CopyAsGenericsOfArray<E> = E | E[];
 export type MenuDefine = CopyAsGenericsOfArray<string | KeyValueString | MenuItem | StringArray>;
 export type StringArray = KeyValueString<",">;
+export type AnyArg = Record<string, any>;
+export interface MenuItemPlain {
+    text: string;
+    value: any;
+}
+export interface MenuPlain {
+    acceptReporters: boolean;
+    items: MenuItemPlain[];
+}
+export interface ArgumentPlain {
+    type?: InputType;
+    defaultValue?: any;
+    menu?: string;
+}
+export interface BlockPlain {
+    opcode: string;
+    arguments: ObjectInclude<ArgumentPlain>;
+    text: string;
+    blockType: BlockType;
+}
+export type ExtensionPlain = {
+    getInfo: () => ExtensionInfo;
+} & {
+    [key: string]: MethodFunction<any>;
+};
+export interface ExtensionInfo {
+    id: string;
+    name: string;
+    blocks: BlockPlain[];
+    menus: ObjectInclude<MenuPlain>;
+    color1: HexColorString;
+    color2: HexColorString;
+    color3: HexColorString;
+}

@@ -1,4 +1,5 @@
-import { GlobalResourceMachine, LoaderConfig, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
+import { ArgumentPlain, BlockPlain, ExtensionPlain, GlobalResourceMachine, HexColorString, LoaderConfig, MenuPlain, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
+import { Extension } from "./structs";
 import loaderConfig from "@config/loader";
 if (!window._FSContext) {
     window._FSContext = {
@@ -7,16 +8,17 @@ if (!window._FSContext) {
     };
 };
 export namespace Extensions {
-    async function generateConstructor(extension: new () => import("./structs").Extension): Promise<any> {
+    async function generateConstructor(extension: typeof Extension): Promise<new (runtime?: Scratch) => ExtensionPlain> {
         const { Version, Menu } = await import("./structs");
         const { Unnecessary } = await import("./tools");
-        var ext = new extension();
-        var context = getFSContext();
-        function ExtensionConstructor(this: any, runtime: Scratch) {
-            if (!runtime.extensions?.unsandboxed && !ext.allowSandboxed) {
+        const ext = extension.onlyInstance;
+        const context = getFSContext();
+        willBePushedInto.forEach(item => ext.blocks.push(item));
+        function ExtensionConstructor(this: ExtensionPlain, runtime?: Scratch): ExtensionPlain {
+            if (!runtime?.extensions?.unsandboxed && !ext.allowSandboxed) {
                 throw new Error(`FSExtension "${ext.id}" must be supported unsandboxed.`)
             };
-            for (let i in ext.requires) {
+            for (const i in ext.requires) {
                 if (!Object.keys(context.EXTENSIONS).includes(i)) {
                     throw new Error(`FSExtension "${ext.id}" requires ${i} to be loaded.`)
                 }
@@ -26,47 +28,44 @@ export namespace Extensions {
             };
             ext.init(runtime);
             ext.runtime = runtime;
-            ext.canvas = runtime.renderer.canvas;
+            if (!ext.allowSandboxed) ext.canvas = runtime?.renderer.canvas;
             ext.blocks.forEach(block => {
-                block.arguments.forEach((arg) => {
+                block.arguments.forEach(arg => {
                     if (arg.inputType === "menu" && arg.value instanceof Menu) {
                         ext.menus.push(arg.value);
                         arg.value = arg.value.name;
                     }
                 });
             });
-            let blocks: any[] = [];
-            for (let block of ext.blocks) {
-                let args: any = {};
-                let currentBlock = {
+            const blocks: BlockPlain[] = [];
+            for (const block of ext.blocks) {
+                const args: ObjectInclude<ArgumentPlain> = {};
+                const currentBlock: BlockPlain = {
                     opcode: block.opcode,
                     blockType: block.type,
                     text: block.text,
                     arguments: args
                 };
-                for (let arg of block.arguments) {
+                for (const arg of block.arguments) {
                     if (arg.type === "input") {
-                        let currentArg: any = {
+                        const currentArg: ArgumentPlain = {
                             type: Unnecessary.castInputType(arg.inputType),
-                        }
+                        };
                         if (arg.inputType === "menu") {
-                            currentArg.menu = arg.value;
+                            currentArg.menu = arg.value as string;
                         } else {
                             currentArg.defaultValue = arg.value;
-                        }
+                        };
                         args[arg.content] = currentArg;
-                    }
-                }
-                this[currentBlock.opcode] = Unnecessary.isAsyncFunction(block.method)
-                    ? async (arg: any) => JSON.stringify(await block.method.call(ext, arg))
-                    : (arg: any) => JSON.stringify(block.method.call(ext, arg));
+                    };
+                };
                 blocks.push(currentBlock);
             }
-            let menus: any = {};
-            for (let menu of ext.menus) {
+            const menus: ObjectInclude<MenuPlain> = {};
+            for (const menu of ext.menus) {
                 menus[menu.name] = {
                     acceptReporters: menu.acceptReporters,
-                    items: menu.items.map((item) => {
+                    items: menu.items.map(item => {
                         return {
                             text: item.name,
                             value: item.value
@@ -75,45 +74,58 @@ export namespace Extensions {
                 };
             }
             ext.calcColor();
-            this.getInfo = function () {
-                return {
-                    id: ext.id,
-                    name: ext.displayName,
-                    blocks,
-                    menus,
-                    color1: ext.colors.block,
-                    color2: ext.colors.inputer,
-                    color3: ext.colors.menu
+            const result: ExtensionPlain = {
+                getInfo() {
+                    return {
+                        id: ext.id,
+                        name: ext.displayName,
+                        blocks,
+                        menus,
+                        color1: ext.colors.block as HexColorString,
+                        color2: ext.colors.inputer as HexColorString,
+                        color3: ext.colors.menu as HexColorString
+                    }
                 }
-            }
-        }
-        return ExtensionConstructor;
+            };
+            ext.blocks.forEach(block => {
+                result[block.opcode] = Unnecessary.isAsyncFunction(block.method)
+                    ? async (arg: ObjectInclude) => JSON.stringify(await block.method.call(ext, arg))
+                    : (arg: ObjectInclude) => JSON.stringify(block.method.call(ext, arg));
+            });
+            return result;
+        };
+        return ExtensionConstructor as unknown as new (runtime?: Scratch) => ExtensionPlain;
     }
+    export const willBePushedInto: import("./structs").Block[] = [];
     export const config: ObjectInclude<LoaderConfig, "loader"> = {
         loader: loaderConfig
     }
     export function isInWaterBoxed() {
         return window.ScratchWaterBoxed !== undefined;
     }
-    export function getScratch(): Scratch | ScratchWaterBoxed | null {
+    export function getScratch(): Scratch | ScratchWaterBoxed | undefined {
         if (window.ScratchWaterBoxed) return window.ScratchWaterBoxed;
         if (window.Scratch) return window.Scratch;
-        return null;
+        return;
     }
     export function getFSContext(): GlobalResourceMachine {
         return window._FSContext as GlobalResourceMachine;
     }
-    export async function load(extension: new () => import("./structs").Extension) {
-        let constructorPlain = extension
-        let constructorGenerated = await generateConstructor(extension);
-        let objectPlain = new constructorPlain();
-        let objectGenerated = new constructorGenerated(getScratch());
-        let scratch = getScratch() as ScratchWaterBoxed;
+    export async function load(extension: typeof Extension) {
+        const constructorPlain = extension;
+        const constructorGenerated = await generateConstructor(extension);
+        const objectPlain = extension.onlyInstance;
+        const objectGenerated = new constructorGenerated(getScratch());
+        const scratch = getScratch() as ScratchWaterBoxed;
         return {
             objectPlain,
             objectGenerated,
+            constructors: {
+                plain: constructorPlain,
+                generated: constructorGenerated
+            },
             to(...platforms: PlatformSupported[]) {
-                for (let platform of platforms) {
+                for (const platform of platforms) {
                     console.log(`Trying to load FSExtension "${objectPlain.id}" on platform "${platform}"...`);
                     if (platform === "TurboWarp") {
                         scratch.extensions.register(objectGenerated);
