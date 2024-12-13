@@ -103,7 +103,7 @@ export default {
 }
 </script>
 <script setup>
-import "../../declare";
+import "../../global.ts";
 import ScratchBlock from "./ScratchBlock.vue";
 import ScratchStage from "./ScratchStage.vue";
 import serverConfig from "../../../../config/server";

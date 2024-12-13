@@ -1,4 +1,4 @@
-import { Extensions } from "."
+import { Extensions } from ".";
 export default async function load() {
     const currentScratch = Extensions.getScratch() as import("@framework/internal").ScratchWaterBoxed;
     if (currentScratch) {

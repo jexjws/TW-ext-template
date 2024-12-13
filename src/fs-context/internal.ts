@@ -33,21 +33,21 @@ export interface ScratchWaterBoxed extends Scratch {
     currentExtension: ExtensionPlain | null;
     loadTempExt: () => void;
 }
-export type BlockType = "command" | "reporter";
+export type BlockTypePlain = "command" | "reporter" | "bool";
 export type ExtractField<A extends (string | ArgumentDefine)[]> = {
     [K in keyof A as A[K] extends ArgumentDefine<infer R> ? R : never]: any;
 }
 export interface BlockConfigA<T extends (string | ArgumentDefine)[]> {
     method?: MethodFunction<ExtractField<T>>;
-    type?: BlockType;
+    type?: BlockTypePlain;
     opcode?: string;
 }
 export interface BlockConfigB<T extends ArgumentDefine[]> {
     arguments?: T;
-    type?: BlockType;
+    type?: BlockTypePlain;
 }
-export interface BlockConfiger<T extends (string | ArgumentDefine)[]> {
-    config: (arg: BlockConfigA<T>) => Block;
+export interface BlockConfiger<T extends (string | ArgumentDefine)[], O extends Extension> {
+    config: (arg: BlockConfigA<T>) => Block<O>;
 }
 export type HexColorString = `#${string}`;
 export interface ColorDefine {
@@ -172,7 +172,7 @@ export interface BlockPlain {
     opcode: string;
     arguments: ObjectInclude<ArgumentPlain>;
     text: string;
-    blockType: BlockType;
+    blockType: BlockTypePlain;
 }
 export type ExtensionPlain = {
     getInfo: () => ExtensionInfo;

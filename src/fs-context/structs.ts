@@ -2,9 +2,8 @@ import { Extensions } from ".";
 import {
     ArgumentDefine,
     ArgumentPart,
-    BlockType,
+    BlockTypePlain,
     ColorDefine,
-    MethodFunction,
     MenuItem,
     TranslatorStoredData,
     LanguageSupported,
@@ -25,7 +24,7 @@ export class Extension {
     version: Version = new Version("1.0.0");
     allowSandboxed: boolean = true;
     requires: ObjectInclude<Version> = {};
-    blocks: Block[] = [];
+    blocks: Block<this&any>[] = [];
     menus: Menu[] = [];
     description: string = "An example extension";
     collaborators: Collaborator[] = [];
@@ -61,10 +60,10 @@ export class Extension {
         };
     }
 }
-export class Block {
-    method: MethodFunction<any> = () => { };
+export class Block<O extends Extension = Extension> {
+    method: (this: O, args: any) => any = () => { };
     arguments: ArgumentPart[] = [];
-    type: BlockType = "command";
+    type: BlockTypePlain = "command";
     private _opcode: string | null = null;
     get opcode(): string {
         return this._opcode ? this._opcode : md5(JSON.stringify(this.arguments));
@@ -80,11 +79,11 @@ export class Block {
         }
         return result;
     }
-    static create<T extends BlockConfigB<ArgumentDefine[]>>(
+    static create<O extends Extension, T extends BlockConfigB<ArgumentDefine[]>>(
         text: string,
         config: T,
-        method?: (this: Extension, arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
-    ) {
+        method?: (this: O, arg: T extends BlockConfigB<infer R> ? ExtractField<R> : never) => any
+    ): Block<O> {
         const realConfig: BlockConfigB<ArgumentDefine[]> = { arguments: config.arguments || [], ...config };
         const _arguments = realConfig.arguments as ArgumentDefine[];
         const realMethod = method || (() => { }) as any;
@@ -98,7 +97,7 @@ export class Block {
                 textLoaded.push(current);
             };
         };
-        return new Block({
+        return new Block<O>({
             method: realMethod,
             type: realConfig.type,
             opcode: method?.name
@@ -119,7 +118,7 @@ export class Block {
                 );
             }
             this.arguments.push(currentPart);
-        }
+        };
         const data = config || {};
         if (data.method) {
             this.method = data.method;
@@ -232,8 +231,8 @@ export class Version {
         return a;
     }
 }
-export namespace BlockTypes {
-    export function Plain(type: BlockType, text: string) {
+export namespace BlockType {
+    export function Plain(type: BlockTypePlain, text: string) {
         return function (_: Extension, propertyKey: string, descriptor: PropertyDescriptor) {
             const block = new Block({
                 opcode: propertyKey,

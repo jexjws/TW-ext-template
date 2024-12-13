@@ -11,22 +11,22 @@ function calcArgs(ele) {
     let result = {};
     ele.querySelectorAll('span.texts').forEach(el => {
         if ([...el.classList].includes("input")) {
-            result[el.querySelector("span").innerText.slice(0, -1)] = el.querySelector(".inputer").value;
-        }
-    })
+            result[el.querySelector("span").innerText.slice(0, -1).split(" ").slice(1).join(" ")] = el.querySelector(".inputer").value;
+        };
+    });
     return result;
-}
+};
 function alerter(sth) {
     window.alert(JSON.stringify(sth));
-}
+};
 function runMethod(ele, opcode) {
     console.log(window.ScratchWaterBoxed.currentExtension[opcode](calcArgs(ele)));
-}
+};
 function view(opcode, type, unparsedText) {
     alert(JSON.stringify({
         opcode, type, unparsedText
     }, null, 4));
-}
+};
 </script>
 <script>
 export default {

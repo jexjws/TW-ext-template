@@ -3,6 +3,9 @@ const { VueLoaderPlugin } = require("vue-loader");
 const WebpackBar = require("webpackbar");
 const path = require("path");
 const serverConfig = require("./config/server");
+/**
+ * @type {import('webpack').Configuration}
+ */
 module.exports = {
     entry: "@framework/ui/waterbox.ts",
     output: {
@@ -57,8 +60,6 @@ module.exports = {
         },
         port: serverConfig.waterBox.port,
         hot: true,
-        client: {
-            progress: true
-        }
+        liveReload: false
     }
 };
