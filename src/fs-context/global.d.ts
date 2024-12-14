@@ -18,6 +18,7 @@ declare interface Window {
             disabled: boolean,
             collaboratorList: import("./structs").Collaborator[]
         }
-    }
-    _FSContext?: import("./internal").GlobalResourceMachine
+    };
+    _FSContext?: import("./internal").GlobalResourceMachine;
+    callErrorOverlay?: (error: Error) => void;
 }

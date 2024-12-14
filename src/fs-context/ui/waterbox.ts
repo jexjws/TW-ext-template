@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import "./base.css";
 import WaterBox from "./componets/WaterBox.vue";
+import config from "@config/loader";
 window.__VUE_OPTIONS_API__ = true;
 window.__VUE_PROD_DEVTOOLS__ = false;
 window.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
@@ -23,6 +24,7 @@ window.ScratchWaterBoxed = {
         get canvas() {
             return document.getElementById("scratch-stage") as HTMLCanvasElement;
         }
-    }
+    },
+    currentCatchErrors: config.errorCatches.map(e => e.name)
 };
 createApp(WaterBox).mount("#ui");

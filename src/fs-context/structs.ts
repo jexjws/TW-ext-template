@@ -185,7 +185,7 @@ export class Translator<L extends LanguageSupported, D extends LanguageStored> {
     }
 }
 export class DataStorer<T extends { [key: string]: any } = any> {
-    data: T;
+    private data: T;
     constructor(data: T) {
         this.data = data;
     }
@@ -202,7 +202,7 @@ export class DataStorer<T extends { [key: string]: any } = any> {
         if (Array.isArray(this.data[key])) {
             this.data[key] = [] as T[K];
         }
-        else this.data[key] = undefined as T[K];
+        else delete this.data[key];
     }
 }
 export class Version {

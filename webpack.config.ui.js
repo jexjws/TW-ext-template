@@ -3,6 +3,7 @@ const { VueLoaderPlugin } = require("vue-loader");
 const WebpackBar = require("webpackbar");
 const path = require("path");
 const serverConfig = require("./config/server");
+const commonConfig = require("./config/webpack");
 /**
  * @type {import('webpack').Configuration}
  */
@@ -15,10 +16,7 @@ module.exports = {
     },
     module: {
         rules: [
-            {
-                test: /\.ts$/i,
-                use: "ts-loader"
-            },
+            ...commonConfig.loaderRule,
             {
                 test: /\.vue$/i,
                 use: "vue-loader"
@@ -26,21 +24,12 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: ["vue-style-loader", "css-loader"]
-            },
-            {
-                test: /\.(html|md)$/i,
-                use: "raw-loader"
             }
         ]
     },
     resolve: {
-        extensions: [".ts", ".js", ".vue"],
-        alias: {
-            "@framework": path.resolve(__dirname, "src/fs-context"),
-            "@src": path.resolve(__dirname, "src"),
-            "@config": path.resolve(__dirname, "config"),
-            "@samples": path.resolve(__dirname, "src/fs-context/samples")
-        }
+        extensions: [...commonConfig.fileExtensions, ".vue"],
+        alias: commonConfig.alias
     },
     plugins: [
         new VueLoaderPlugin(),
@@ -54,12 +43,7 @@ module.exports = {
         })
     ],
     devServer: {
-        static: "./",
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        },
+        ...commonConfig.devServer,
         port: serverConfig.waterBox.port,
-        hot: true,
-        liveReload: false
     }
 };

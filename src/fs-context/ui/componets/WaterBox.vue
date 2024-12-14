@@ -10,8 +10,8 @@
                 <span v-if="extensionLoaded">- {{ extName }}({{ extId }})</span>
             </span>
             <div class="tools">
-                <button @click="reloadExtension()">重载拓展</button>
-                <button @click="copyExtensionUrl()">复制拓展脚本url</button>
+                <WButton @click="reloadExtension">重载拓展</WButton>
+                <WButton @click="copyExtensionUrl">复制拓展脚本url</WButton>
             </div>
             <div class="blocks">
                 <ScratchBlock v-for="block in blocks" :key="block.opcode" :colorBlock="colorBlock"
@@ -36,6 +36,7 @@
             </div>
         </div>
     </div>
+    <FullscreenOverlay />
 </template>
 <script>
 console.log("WaterBox loading");
@@ -103,11 +104,13 @@ export default {
 }
 </script>
 <script setup>
-import "../../global.ts";
+import "../../global.d";
 import ScratchBlock from "./ScratchBlock.vue";
 import ScratchStage from "./ScratchStage.vue";
 import serverConfig from "../../../../config/server";
 import { Menu } from "../../structs";
+import FullscreenOverlay from "./FullscreenOverlay.vue";
+import WButton from "./WButton.vue";
 </script>
 <style scoped>
 .container {
@@ -124,19 +127,6 @@ import { Menu } from "../../structs";
     border: gray 3px solid;
     display: flex;
     flex-direction: column;
-}
-
-button {
-    padding: 3px 5px;
-    border: rgb(128, 128, 128) 2px solid;
-    background-color: rgb(230, 230, 230);
-    color: black;
-    border-radius: 5px;
-}
-
-button:hover {
-    border-color: rgb(64, 64, 64);
-    background-color: rgb(200, 200, 200);
 }
 
 .title {

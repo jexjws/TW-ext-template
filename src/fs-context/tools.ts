@@ -16,8 +16,8 @@ import { DataStorer, Extension } from "./structs";
 import { CastError, MissingError, OverwriteWarn, SyntaxError } from "./exceptions";
 export namespace GlobalContext {
     const context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
-    export function createDataStore<T extends { [key: string]: any }>(forExt: typeof Extension, datas: T): DataStorer<T> {
-        const { id } = forExt.onlyInstance;
+    export function createDataStore<T extends { [key: string]: any }>(target: typeof Extension | string, datas: T): DataStorer<T> {
+        const { id } = typeof target === "string" ? { id: target } : target.onlyInstance;
         if (Object.hasOwn(context.EXPORTED, id)) {
             throw new OverwriteWarn(`Data store named "${id}" is already exists.`);
         };

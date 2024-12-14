@@ -1,6 +1,10 @@
 const WebpackBar = require("webpackbar");
 const path = require("path");
 const serverConfig = require("./config/server");
+const commonConfig = require("./config/webpack");
+/**
+ * @type {import('webpack').Configuration}
+ */
 module.exports = {
     entry: "@framework/entry.ts",
     output: {
@@ -10,28 +14,16 @@ module.exports = {
     },
     module: {
         rules: [
-            {
-                test: /\.ts$/i,
-                use: "ts-loader"
-            },
+            ...commonConfig.loaderRule,
             {
                 test: /\.css$/i,
                 use: ["style-loader", "css-loader"]
-            },
-            {
-                test: /\.(html|md)$/i,
-                use: "raw-loader"
             }
         ]
     },
     resolve: {
-        extensions: [".ts", ".js"],
-        alias: {
-            "@framework": path.resolve(__dirname, "src/fs-context"),
-            "@src": path.resolve(__dirname, "src"),
-            "@config": path.resolve(__dirname, "config"),
-            "@samples": path.resolve(__dirname, "src/fs-context/samples")
-        }
+        extensions: [...commonConfig.fileExtensions],
+        alias: commonConfig.alias
     },
     plugins: [
         new WebpackBar({
@@ -40,17 +32,13 @@ module.exports = {
         })
     ],
     devServer: {
-        static: "./",
+        ...commonConfig.devServer,
         headers: {
             'Access-Control-Allow-Origin': '*'
         },
         port: serverConfig.extension.port,
-        compress: true,
         hot: false,
         liveReload: false,
-        webSocketServer: false,
-        client: {
-            overlay: false
-        }
+        webSocketServer: false
     }
 }

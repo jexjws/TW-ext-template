@@ -32,6 +32,7 @@ export interface ScratchWaterBoxed extends Scratch {
     currentExtensionPlain: Extension | null;
     currentExtension: ExtensionPlain | null;
     loadTempExt: () => void;
+    currentCatchErrors: string[];
 }
 export type BlockTypePlain = "command" | "reporter" | "bool";
 export type ExtractField<A extends (string | ArgumentDefine)[]> = {

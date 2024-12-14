@@ -1,3 +1,4 @@
+import * as exceptions from "@framework/exceptions";
 import { AnyArg, ColorDefine } from "@framework/internal";
 import { Block, BlockType, Collaborator, Extension, Menu, Translator, Version } from "@framework/structs";
 import { GlobalContext, Unnecessary } from "@framework/tools";
@@ -110,5 +111,6 @@ const dataStore = GlobalContext.createDataStore(MyExtension, {
     alertedSth: [] as string[],
     lastSuffix: "",
     tools: Unnecessary,
-    fruitsEaten: [] as string[]
+    fruitsEaten: [] as string[],
+    exceptions
 });

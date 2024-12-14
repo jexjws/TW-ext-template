@@ -1,48 +1,23 @@
-export class ExtensionLoadError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "ExtensionLoadError";
+function createException(name: string) {
+    return class extends Error {
+        constructor(message?: string) {
+            super(message);
+            this.name = name;
+            if (
+                window.callErrorOverlay
+                && window.ScratchWaterBoxed
+                && window.ScratchWaterBoxed.currentCatchErrors.includes(name)
+            ) {
+                window.callErrorOverlay(this);
+            };
+        };
     };
 };
-export class CastError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "CastError";
-    };
-};
-export class UncaughtGenerator extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "UncaughtGenerator";
-    };
-};
-export class SyntaxError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "SyntaxError";
-    };
-};
-export class UncognizedError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "UncognizedError";
-    };
-};
-export class MissingError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "MissingError";
-    };
-};
-export class OnlyInstanceWarn extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "OnlyInstanceWarn";
-    };
-};
-export class OverwriteWarn extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = "OverwriteWarn";
-    };
-};
+export const ExtensionLoadError = createException("ExtensionLoadError");
+export const CastError = createException("CastError");
+export const GeneratedFailed = createException("GeneratedFailed");
+export const SyntaxError = createException("SyntaxError");
+export const UncognizedError = createException("UncognizedError");
+export const MissingError = createException("MissingError");
+export const OnlyInstanceWarn = createException("OnlyInstanceWarn");
+export const OverwriteWarn = createException("OverwriteWarn");
