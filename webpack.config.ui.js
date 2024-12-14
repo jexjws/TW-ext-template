@@ -4,10 +4,12 @@ const WebpackBar = require("webpackbar");
 const path = require("path");
 const serverConfig = require("./config/server");
 const commonConfig = require("./config/webpack");
+const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 /**
  * @type {import('webpack').Configuration}
  */
 module.exports = {
+    ...commonConfig.staticShow,
     entry: "@framework/ui/waterbox.ts",
     output: {
         filename: `${serverConfig.waterBox.output}.dist.js`,
@@ -16,7 +18,6 @@ module.exports = {
     },
     module: {
         rules: [
-            ...commonConfig.loaderRule,
             {
                 test: /\.vue$/i,
                 use: "vue-loader"
@@ -24,7 +25,8 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: ["vue-style-loader", "css-loader"]
-            }
+            },
+            ...commonConfig.loaderRule
         ]
     },
     resolve: {
@@ -40,6 +42,13 @@ module.exports = {
         new WebpackBar({
             name: "WaterBox",
             color: "blue"
+        }),
+        new FriendlyErrorsWebpackPlugin({
+            compilationSuccessInfo: {
+                messages: [
+                    `[WaterBox] Debugger is running on http://127.0.0.1:${serverConfig.waterBox.port}`
+                ]
+            }
         })
     ],
     devServer: {

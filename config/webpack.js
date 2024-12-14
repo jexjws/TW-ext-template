@@ -1,6 +1,7 @@
 const path = require("path");
+const process = require("process");
 /**
- * @type {import("webpack").RuleSetRule}
+ * @type {import("webpack").RuleSetRule[]}
  */
 const loaderRule = [
     {
@@ -9,7 +10,8 @@ const loaderRule = [
     },
     {
         test: /\.ts$/i,
-        use: "ts-loader"
+        use: "ts-loader",
+        exclude: /\.d\.ts$/i
     },
     {
         test: /\.(html|md)$/i,
@@ -17,10 +19,10 @@ const loaderRule = [
     }
 ];
 const alias = {
-    "@framework": path.resolve(__dirname, "src/fs-context"),
-    "@src": path.resolve(__dirname, "src"),
-    "@config": path.resolve(__dirname, "config"),
-    "@samples": path.resolve(__dirname, "src/fs-context/samples")
+    "@framework": path.resolve(process.cwd(), "src/fs-context"),
+    "@src": path.resolve(process.cwd(), "src"),
+    "@config": path.resolve(process.cwd(), "config"),
+    "@samples": path.resolve(process.cwd(), "src/fs-context/samples")
 };
 const fileExtensions = [".ts", ".js"];
 /**
@@ -30,11 +32,18 @@ const devServer = {
     static: "./",
     client: {
         overlay: false,
-        progress: false
+        progress: false,
+        logging: "none"
     },
     compress: true,
     hot: true,
     liveReload: true,
-    webSocketServer: true
+    setupExitSignals:false
 };
-module.exports = { loaderRule, alias, fileExtensions, devServer };
+/**
+ * @type {import("webpack").Configuration}
+ */
+const staticShow = {
+    stats: "errors-only"
+};
+module.exports = { loaderRule, alias, fileExtensions, devServer, staticShow };

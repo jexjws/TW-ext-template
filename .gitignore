@@ -1,4 +1,10 @@
+# module stores
 node_modules
+
+# package manager's lockfile
 package-lock.json
-dist
 yarn.lock
+
+# compiling results
+dist
+generated

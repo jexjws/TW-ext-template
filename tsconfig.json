@@ -21,11 +21,11 @@
       "@samples/*": [
         "./src/fs-context/samples/*"
       ]
-    }
+    },
+    "baseUrl": "."
   },
   "include": [
     "./src/**/*.ts",
-    "./config/**/*.ts",
-    "./src/**/*.d.ts"
+    "./config/**/*.ts"
   ]
 }
