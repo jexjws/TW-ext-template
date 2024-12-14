@@ -147,7 +147,7 @@ export type FilterOut<T, U> = T extends U ? never : T;
 export type AcceptedArgType = InputTypeCast[FilterOut<InputType, "">];
 export interface LoaderConfig {
     target: Promise<{ default: typeof Extension }>;
-    errorCatches: string[];
+    errorCatches: (new () => Error)[];
     platform: PlatformSupported[];
 }
 export type KeyValueString<T extends string = "="> = `${string}${T}${string}`;

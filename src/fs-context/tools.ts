@@ -13,31 +13,32 @@ import {
     AcceptedMenuValue
 } from "./internal";
 import { DataStorer, Extension } from "./structs";
+import { CastError, MissingError, OverwriteWarn, SyntaxError } from "./exceptions";
 export namespace GlobalContext {
     const context: GlobalResourceMachine = window._FSContext as GlobalResourceMachine;
     export function createDataStore<T extends { [key: string]: any }>(forExt: typeof Extension, datas: T): DataStorer<T> {
         const { id } = forExt.onlyInstance;
         if (Object.hasOwn(context.EXPORTED, id)) {
-            throw new Error(`Data store for FSExtenion "${id}" is already exists.`);
-        }
+            throw new OverwriteWarn(`Data store named "${id}" is already exists.`);
+        };
         context.EXPORTED[id] = new DataStorer<T>(datas);
         return context.EXPORTED[id];
-    }
+    };
     export function destoryDataStore(id: string) {
         if (Object.hasOwn(context.EXPORTED, id)) {
             delete context.EXPORTED[id];
         } else {
-            throw new Error(`Data store "${id}" does not exist.`);
-        }
-    }
+            throw new MissingError(`Data store "${id}" does not exist.`);
+        };
+    };
     export function getDataStore<T extends { [key: string]: any } = any>(id: string): DataStorer<T> {
         if (Object.hasOwn(context.EXPORTED, id)) {
             return context.EXPORTED[id] as DataStorer<T>;
         } else {
-            throw new Error(`Data store "${id}" does not exist.`);
-        }
-    }
-}
+            throw new MissingError(`Data store "${id}" does not exist.`);
+        };
+    };
+};
 export namespace Unnecessary {
     export function elementTree<T extends keyof HTMLElementTagNameMap>(
         tag: T,
@@ -136,10 +137,10 @@ export namespace Unnecessary {
     export function hexToRgb(str: HexColorString): [number, number, number] {
         let hexs: any[] = [];;
         const reg = /^#?[0-9A-Fa-f]{6}$/;
-        if (!reg.test(str)) throw new Error('Invalid hex color string');
+        if (!reg.test(str)) throw new SyntaxError('Invalid hex color string');
         str = str.replace('#', '') as HexColorString;
         hexs = str.match(/../g) || [];
-        if (hexs.length < 3) throw new Error('Invalid hex color string');
+        if (hexs.length < 3) throw new SyntaxError('Invalid hex color string');
         return [parseInt(hexs[0], 16), parseInt(hexs[1], 16), parseInt(hexs[2], 16)];
     }
     export function darken(color: HexColorString, level: number): HexColorString {
@@ -269,7 +270,7 @@ export namespace TextParser {
             result = result.split("=", 1)[0];
         };
         if (!AcceptedInputType.includes(result)) {
-            throw new Error(`Invalid input type: ${result}`);
+            throw new CastError(`Invalid input type: ${result}`);
         };
         return result as InputType;
     }

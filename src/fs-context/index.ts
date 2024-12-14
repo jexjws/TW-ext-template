@@ -1,3 +1,4 @@
+import { ExtensionLoadError, UncognizedError } from "./exceptions";
 import { ArgumentPlain, BlockPlain, ExtensionPlain, GlobalResourceMachine, HexColorString, LoaderConfig, MenuPlain, ObjectInclude, PlatformSupported, Scratch, ScratchWaterBoxed } from "./internal";
 import { Extension } from "./structs";
 import loaderConfig from "@config/loader";
@@ -13,17 +14,16 @@ export namespace Extensions {
         const { Unnecessary } = await import("./tools");
         const ext = extension.onlyInstance;
         const context = getFSContext();
-        willBePushedInto.forEach(item => ext.blocks.push(item));
         function ExtensionConstructor(this: ExtensionPlain, runtime?: Scratch): ExtensionPlain {
             if (!runtime?.extensions?.unsandboxed && !ext.allowSandboxed) {
-                throw new Error(`FSExtension "${ext.id}" must be supported unsandboxed.`)
+                throw new ExtensionLoadError(`FSExtension "${ext.id}" must be supported unsandboxed.`)
             };
             for (const i in ext.requires) {
                 if (!Object.keys(context.EXTENSIONS).includes(i)) {
-                    throw new Error(`FSExtension "${ext.id}" requires ${i} to be loaded.`)
+                    throw new ExtensionLoadError(`FSExtension "${ext.id}" requires ${i} to be loaded.`)
                 }
                 if (Version.compare(context.EXTENSIONS[i], ext.requires[i]) === ext.requires[i]) {
-                    throw new Error(`FSExtension "${ext.id}" requires ${i} to be at least ${ext.requires[i]}.`)
+                    throw new ExtensionLoadError(`FSExtension "${ext.id}" requires ${i} to be at least ${ext.requires[i]}.`)
                 };
             };
             ext.init(runtime);
@@ -60,7 +60,7 @@ export namespace Extensions {
                     };
                 };
                 blocks.push(currentBlock);
-            }
+            };
             const menus: ObjectInclude<MenuPlain> = {};
             for (const menu of ext.menus) {
                 menus[menu.name] = {
@@ -72,7 +72,7 @@ export namespace Extensions {
                         };
                     })
                 };
-            }
+            };
             ext.calcColor();
             const result: ExtensionPlain = {
                 getInfo() {
@@ -96,7 +96,6 @@ export namespace Extensions {
         };
         return ExtensionConstructor as unknown as new (runtime?: Scratch) => ExtensionPlain;
     }
-    export const willBePushedInto: import("./structs").Block[] = [];
     export const config: ObjectInclude<LoaderConfig, "loader"> = {
         loader: loaderConfig
     }
@@ -142,7 +141,7 @@ export namespace Extensions {
                             }
                         };
                     } else {
-                        throw new Error(`Unknown platform "${platform}"`);
+                        throw new UncognizedError(`Unknown platform "${platform}"`);
                     };
                     if (isInWaterBoxed()) {
                         scratch.currentExtension = objectGenerated;

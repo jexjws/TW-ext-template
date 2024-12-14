@@ -18,13 +18,14 @@ import {
 } from "./internal";
 import md5 from "md5";
 import { MenuParser, TextParser, Unnecessary } from "./tools";
+import { MissingError, OnlyInstanceWarn } from "./exceptions";
 export class Extension {
     id: string = "example-extension";
     displayName: string = "Example extension";
     version: Version = new Version("1.0.0");
     allowSandboxed: boolean = true;
     requires: ObjectInclude<Version> = {};
-    blocks: Block<this&any>[] = [];
+    blocks: Block<this & any>[] = [];
     menus: Menu[] = [];
     description: string = "An example extension";
     collaborators: Collaborator[] = [];
@@ -36,9 +37,13 @@ export class Extension {
     canvas?: HTMLCanvasElement;
     private static instance?: Extension;
     static get onlyInstance(): Extension {
-        if (!this.instance) this.instance = new this(true);
+        if (!this.instance) {
+            this.instance = new this(true);
+            this.instance.blocks.push(...this.blockDecorated);
+        };
         return this.instance;
     };
+    static blockDecorated: Block[] = [];
     calcColor() {
         if (this.autoDeriveColors) {
             if (this.colors.theme) {
@@ -46,9 +51,9 @@ export class Extension {
                 this.colors.inputer = Unnecessary.darken(this.colors.theme, 0.15);
                 this.colors.menu = Unnecessary.darken(this.colors.theme, 0.3);
             } else {
-                throw new Error(`FSExtension "${this.id}" can auto derive colors but have no theme color.`);
-            }
-        }
+                throw new MissingError(`FSExtension "${this.id}" can auto derive colors but have no theme color.`);
+            };
+        };
         return this.colors;
     };
     init(runtime?: Scratch): any {
@@ -56,9 +61,9 @@ export class Extension {
     };
     constructor(ignoreError: boolean = false) {
         if (!ignoreError) {
-            throw new Error("Extension can not be instantiated directly.");
+            throw new OnlyInstanceWarn("Extension can not be instantiated directly.");
         };
-    }
+    };
 }
 export class Block<O extends Extension = Extension> {
     method: (this: O, args: any) => any = () => { };
@@ -233,14 +238,15 @@ export class Version {
 }
 export namespace BlockType {
     export function Plain(type: BlockTypePlain, text: string) {
-        return function (_: Extension, propertyKey: string, descriptor: PropertyDescriptor) {
+        return function (target: Extension, propertyKey: string, descriptor: PropertyDescriptor) {
             const block = new Block({
                 opcode: propertyKey,
                 type,
                 method: descriptor.value
             });
+            const parent: typeof Extension = target.constructor as typeof Extension;
             block.arguments = TextParser.parsePart(text);
-            Extensions.willBePushedInto.push(block);
+            parent.blockDecorated.push(block);
         };
     }
     export function Command(text: string) {
