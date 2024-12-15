@@ -1,0 +1,39 @@
+name: Build current extension
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [21.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        npm install
+        npm run dist:ext
+        npm run dist:ui
+
+    - name: Commit
+      run: |
+        cd dist
+        git init
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git remote add origin https://github.com/Rundll86/fs-context.git
+        git branch -M main
+        git add .
+        git commit -m "Build from Actions"
+        git push -f origin dist
