@@ -3,6 +3,7 @@ import { ArgumentPlain, BlockPlain, ExtensionPlain, GlobalResourceMachine, HexCo
 import { Extension } from "./structs";
 import loaderConfig from "@config/loader";
 if (!window._FSContext) {
+    // 这个判断有点史，优化下
     window._FSContext = {
         EXTENSIONS: {},
         EXPORTED: {}
