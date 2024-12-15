@@ -22,9 +22,10 @@ jobs:
 
     - name: Build
       run: |
-        npm install
-        npm run dist:ext
-        npm run dist:ui
+        npm i
+        npm i yarn -g
+        yarn dist:ext
+        yarn dist:ui
 
     - name: Commit
       run: |
