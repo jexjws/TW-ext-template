@@ -15,25 +15,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Build
-      run: |
-        npm i yarn -g
-        yarn install
-        yarn dist:ext
-        yarn dist:ui
-
-    - name: Commit
-      run: |
-        cd dist
-        git init
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git remote add origin https://github.com/Rundll86/fs-context.git
-        git add .
-        git commit -m "Build from Actions"
-        git push -f -u origin master:dist
+    - name: Out
+      run: echo "cmnd,sb github"
