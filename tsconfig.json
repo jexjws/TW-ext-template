@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "ESNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "outDir": "generated",
     "experimentalDecorators": true,
     "resolveJsonModule": true,
+    "moduleResolution": "bundler",
     "paths": {
       "@framework/*": [
         "./src/fs-context/*"

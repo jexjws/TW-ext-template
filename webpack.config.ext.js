@@ -10,9 +10,12 @@ module.exports = {
     ...commonConfig.staticShow,
     entry: "@framework/entry.ts",
     output: {
-        filename: `${serverConfig.extension.output}.dist.js`,
+        // filename: `${serverConfig.extension.output}.dist.js`,
+        filename:"[name].dist.js",
         path: path.resolve(__dirname, `dist/${serverConfig.extension.output}`),
-        clean: true
+        clean: true,
+        library: serverConfig.extension.output,
+        libraryTarget: "window"
     },
     module: {
         rules: [

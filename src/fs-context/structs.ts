@@ -16,7 +16,6 @@ import {
     BlockConfigA,
     MenuDefine
 } from "./internal";
-import md5 from "md5";
 import { MenuParser, TextParser, Unnecessary } from "./tools";
 import { MissingError, OnlyInstanceWarn } from "./exceptions";
 export class Extension {
