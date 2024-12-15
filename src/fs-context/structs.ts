@@ -68,9 +68,9 @@ export class Block<O extends Extension = Extension> {
     method: (this: O, args: any) => any = () => { };
     arguments: ArgumentPart[] = [];
     type: BlockTypePlain = "command";
-    private _opcode: string | null = null;
+    private _opcode: string = "";
     get opcode(): string {
-        return this._opcode ? this._opcode : md5(JSON.stringify(this.arguments));
+        return this._opcode;
     }
     get text(): string {
         let result: string = "";
@@ -104,7 +104,7 @@ export class Block<O extends Extension = Extension> {
         return new Block<O>({
             method: realMethod,
             type: realConfig.type,
-            opcode: method?.name
+            opcode: method?.name || Unnecessary.internalUUID.next()
         }, ...textLoaded);
     }
     constructor(config?: BlockConfigA<[]>, ...args: any[]) {
@@ -123,15 +123,17 @@ export class Block<O extends Extension = Extension> {
             }
             this.arguments.push(currentPart);
         };
-        const data = config || {};
-        if (data.method) {
-            this.method = data.method;
-        };
-        if (data.type) {
-            this.type = data.type;
-        };
-        if (data.opcode) {
-            this._opcode = data.opcode;
+        if (config) {
+            const data = config;
+            if (data.method) {
+                this.method = data.method;
+            };
+            if (data.type) {
+                this.type = data.type;
+            };
+            if (data.opcode) {
+                this._opcode = data.opcode;
+            };
         };
     };
 }

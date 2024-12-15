@@ -1,4 +1,3 @@
-import md5 from "md5";
 import {
     AcceptedInputType,
     ArgumentPart,
@@ -107,7 +106,7 @@ export namespace Unnecessary {
             const result = [];
             for (let i = 0; i < this.length; i++) {
                 this.last++;
-                result.push(md5(this.last + i.toString()).slice(0, 5));
+                result.push(this.last.toString(32).slice(0, 5));
             }
             return result.join('-');
         }
@@ -115,6 +114,7 @@ export namespace Unnecessary {
             this.length = length;
         }
     }
+    export const internalUUID = new UUIDAutoscalator();
     export function splitArgBoxPart(str: string, substrings: string[]) {
         const filteredSubstrings = [];
         for (let i = 0; i < str.length; i++) {

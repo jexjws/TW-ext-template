@@ -41,7 +41,7 @@ export type ExtractField<A extends (string | ArgumentDefine)[]> = {
 export interface BlockConfigA<T extends (string | ArgumentDefine)[]> {
     method?: MethodFunction<ExtractField<T>>;
     type?: BlockTypePlain;
-    opcode?: string;
+    opcode: string;
 }
 export interface BlockConfigB<T extends ArgumentDefine[]> {
     arguments?: T;
