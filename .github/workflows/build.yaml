@@ -4,16 +4,29 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [21.x]
-
     steps:
-    - uses: actions/checkout@v4
+      - name: ⚙️ Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Out
-      run: echo "cmnd,sb github"
+      - name: ⚙️📦️ Build
+        run: |
+        yarn install
+        yarn dist:ext
+        yarn dist:ui
+
+      - name: 🚀️ Commit
+        run: |
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add dist
+          git commit -m "Build: Update dist files" || echo "No changes to commit"
+          git push origin main
