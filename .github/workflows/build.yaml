@@ -19,9 +19,9 @@ jobs:
 
       - name: ⚙️📦️ Build
         run: |
-        yarn install
-        yarn dist:ext
-        yarn dist:ui
+          yarn install
+          yarn dist:ext
+          yarn dist:ui
 
       - name: 🚀️ Commit
         run: |
